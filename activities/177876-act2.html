@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ACT-02 :: SECURITY SERVICES</title>
+  
+  <link rel="icon" type="image/png" href="../assets/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-void: #050508;
+      --zsnes-top: #5a6885;
+      --zsnes-bottom: #212536;
+      --metal-light: #8a9bb8;
+      --metal-dark: #12141d;
+      --text-main: #d1d5db;
+      --text-dim: #9ca3af;
+      --accent-blue: #8ab4f8; 
+      --accent-red: #ef4444;
+      --accent-green: #4ade80;
+      --accent-gold: #facc15;
+      --accent-purple: #a855f7;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-void);
+      color: var(--text-main);
+      font-family: 'VT323', monospace;
+      font-size: 20px;
+      line-height: 1.6;
+      padding-top: 60px;
+      overflow-x: hidden;
+    }
+
+    /* CRT SCANLINES */
+    .crt-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+      background-size: 100% 4px; pointer-events: none; z-index: 9999;
+    }
+
+    /* NAVBAR */
+    .zsnes-bar {
+      position: fixed; top: 0; left: 0; width: 100%; height: 45px;
+      background: linear-gradient(180deg, var(--zsnes-top) 0%, var(--zsnes-bottom) 100%);
+      border-bottom: 2px solid var(--metal-dark);
+      display: flex; align-items: center; padding: 0 1rem; z-index: 1000;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      font-family: 'Space Mono', monospace; font-size: 0.85rem;
+    }
+
+    .nav-link {
+      color: #fff; text-decoration: none; margin-right: 20px; font-weight: bold;
+      text-transform: uppercase; letter-spacing: 1px;
+    }
+    .nav-link:hover { color: var(--accent-blue); }
+
+    /* LAYOUT */
+    main { max-width: 1000px; margin: 2rem auto; padding: 0 1rem; }
+
+    .report-header {
+      text-align: center; border-bottom: 2px dashed #444; padding-bottom: 2rem; margin-bottom: 3rem;
+    }
+    .report-header h1 { font-size: 3rem; color: var(--accent-purple); margin: 0; text-shadow: 4px 4px 0 #000; }
+    .meta-tag { background: #222; padding: 2px 8px; font-family: 'Space Mono'; font-size: 0.8rem; color: #aaa; border: 1px solid #444; }
+
+    /* WINDOW FRAMES */
+    .window-frame {
+      background: #0a0a0f; border: 2px solid #333; margin-bottom: 4rem;
+      border-top-color: var(--metal-light); border-left-color: var(--metal-light);
+      border-right-color: var(--metal-dark); border-bottom-color: var(--metal-dark);
+    }
+    .window-bar {
+      background: linear-gradient(90deg, var(--zsnes-bottom), #000); padding: 5px 15px;
+      border-bottom: 2px solid #333; display: flex; justify-content: space-between; align-items: center;
+      font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--accent-blue); letter-spacing: 1px;
+    }
+    .window-content { padding: 2rem; }
+
+    /* TYPOGRAPHY & ELEMENTS */
+    h2 { color: var(--accent-blue); border-bottom: 1px solid #333; padding-bottom: 5px; margin: 2rem 0 1rem 0; font-size: 1.5rem; text-transform: uppercase; }
+    p { margin-bottom: 1rem; text-align: justify; color: var(--text-dim); }
+    
+    .objectives-box {
+        background: rgba(0,0,0,0.3); border-left: 4px solid var(--accent-gold); padding: 1rem; margin-bottom: 2rem; font-size: 0.95rem;
+    }
+
+    /* SCENARIO CARD */
+    .scenario-card {
+        border: 1px solid #333; background: #0e0e14; margin-bottom: 2rem; padding: 1rem;
+        position: relative;
+    }
+    .scenario-title {
+        background: #1a1a24; padding: 5px 10px; font-family: 'Space Mono'; font-weight: bold;
+        color: var(--accent-green); border-bottom: 1px solid #333; margin: -1rem -1rem 1rem -1rem;
+        display: flex; justify-content: space-between;
+    }
+
+    /* TECH TABLE */
+    .tech-table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-family: 'Space Mono', monospace; font-size: 0.8rem; }
+    .tech-table th { background: #15151a; color: #aaa; padding: 8px; border: 1px solid #333; text-align: left; width: 30%; }
+    .tech-table td { border: 1px solid #333; padding: 8px; vertical-align: top; color: var(--text-main); }
+    .tech-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .def-list { margin: 0; padding-left: 15px; color: var(--text-dim); }
+    .def-list li { margin-bottom: 5px; }
+    .highlight { color: var(--accent-blue); font-weight: bold; }
+
+    /* FOOTER */
+    footer { text-align: center; padding: 3rem; color: #555; font-size: 0.9rem; border-top: 1px solid #222; margin-top: 3rem; }
+    .pdf-btn {
+        display: inline-block; background: var(--accent-red); color: #000; padding: 10px 20px;
+        text-decoration: none; font-weight: bold; font-family: 'Space Mono'; margin-top: 2rem;
+        border: 2px solid #fff;
+    }
+    .pdf-btn:hover { background: #fff; color: var(--accent-red); }
+
+  </style>
+</head>
+<body>
+
+<div class="crt-overlay"></div>
+
+<nav class="zsnes-bar">
+    <a href="../parcial1.html" class="nav-link"><< RETURN TO INDEX</a>
+    <span style="margin-left:auto; color:#aaa; font-family:'Space Mono'">FILE: ACT02_X800_RFC.HTML</span>
+</nav>
+
+<main>
+
+  <header class="report-header">
+    <span class="meta-tag">27 JAN 2026</span>
+    <span class="meta-tag">CNO V</span>
+    <span class="meta-tag">177876</span>
+    <h1>ANÁLISIS DE SERVICIOS X.800 Y RFC 4949</h1>
+    <p style="font-size: 1.2rem; color: #fff; margin-top: 1rem;">FUNDAMENTOS DEL HACKING ÉTICO: ESCENARIOS DE INCIDENTES</p>
+  </header>
+
+  <article class="window-frame">
+    <div class="window-bar">
+      <span>/DOCS/00_INTRODUCCION.TXT</span>
+      <div class="window-controls"><span></span><span></span></div>
+    </div>
+    <div class="window-content">
+      
+      <div class="objectives-box">
+        <strong>OBJETIVO GENERAL:</strong><br>
+        Analizar escenarios de incidentes de seguridad informática mediante la aplicación de los seis servicios de seguridad definidos en el <strong>ITU-T X.800</strong> y el uso preciso de la terminología del <strong>RFC 4949</strong>.
+      </div>
+
+      <h2>Marco Conceptual</h2>
+      <p>
+        <strong>RFC 4949 (Glosario):</strong> Estándar global de la IETF para la jerga en Ciberseguridad. Define riesgos, amenazas y vulnerabilidades para mejorar la claridad en la documentación técnica y el debate.
+      </p>
+      <p>
+        <strong>ITU-T X.800 (Arquitectura de Seguridad OSI):</strong> Marco conceptual para implementar seguridad en redes. Complementa el modelo OSI y sirve de base para normas como ISO 27000. Se enfoca en autenticación, control de acceso, confidencialidad, integridad, no repudio y disponibilidad.
+      </p>
+    </div>
+  </article>
+
+  <article class="window-frame">
+    <div class="window-bar">
+      <span>/DB/INCIDENTS_DATABASE.SQL</span>
+      <div class="window-controls"><span></span><span></span></div>
+    </div>
+    <div class="window-content">
+
+      <div class="scenario-card">
+        <div class="scenario-title"><span>CASE_01: RANSOMWARE LOCKBIT</span> <span>[HIGH SEVERITY]</span></div>
+        <p>Cifrado masivo de servidores tras exfiltración de información. Compromiso simultáneo de CIA (Confidencialidad, Integridad, Disponibilidad).</p>
+        <table class="tech-table">
+          <tr><th>Servicios X.800</th><td class="highlight">Autenticación, Control de accesos, Confidencialidad</td></tr>
+          <tr><th>Definiciones RFC 4949</th><td>
+            <ul class="def-list">
+                <li><strong>Authentication:</strong> Verificación de identidad declarada.</li>
+                <li><strong>Credential Compromise:</strong> Exposición de claves a acceso no autorizado.</li>
+                <li><strong>One-way Encryption:</strong> Transformación irreversible (ataque).</li>
+            </ul>
+          </td></tr>
+          <tr><th>Vector de Ataque</th><td>Data Breach + Cifrado Malicioso.</td></tr>
+          <tr><th>Impacto</th><td>Pérdida de datos, daño infraestructura, compromiso usuarios.</td></tr>
+          <tr><th>Control</th><td>Respaldos inmutables, MFA, detección de accesos remotos.</td></tr>
+        </table>
+      </div>
+
+      <div class="scenario-card">
+        <div class="scenario-title"><span>CASE_02: CLOUD MISCONFIGURATION</span> <span>[MED SEVERITY]</span></div>
+        <p>Bases de datos públicas por error de configuración en la nube. No hubo intrusión activa sofisticada.</p>
+        <table class="tech-table">
+          <tr><th>Servicios X.800</th><td class="highlight">Confidencialidad de datos</td></tr>
+          <tr><th>Definiciones RFC 4949</th><td>
+            <ul class="def-list">
+                <li><strong>Exposure:</strong> Condición donde info sensible queda accesible.</li>
+                <li><strong>Misconfiguration:</strong> Configuración incorrecta que introduce vulnerabilidad.</li>
+                <li><strong>Unauthorized Access:</strong> Acceso a recurso sin permiso.</li>
+            </ul>
+          </td></tr>
+          <tr><th>Vector de Ataque</th><td>Configuración incorrecta de ACLs en almacenamiento.</td></tr>
+          <tr><th>Impacto</th><td>Divulgación de info sensible, daño reputacional y legal.</td></tr>
+          <tr><th>Control</th><td>Validación de configs, principio de mínimo privilegio.</td></tr>
+        </table>
+      </div>
+
+      <div class="scenario-card">
+        <div class="scenario-title"><span>CASE_03: SUPPLY CHAIN ATTACK</span> <span>[CRITICAL]</span></div>
+        <p>Proveedor legítimo de software comprometido distribuyó malware en actualizaciones firmadas.</p>
+        <table class="tech-table">
+          <tr><th>Servicios X.800</th><td class="highlight">Integridad de datos</td></tr>
+          <tr><th>Definiciones RFC 4949</th><td>
+            <ul class="def-list">
+                <li><strong>Integrity:</strong> Datos no modificados sin autorización.</li>
+                <li><strong>Supply Chain Attack:</strong> Compromiso de elemento confiable (proveedor).</li>
+                <li><strong>Malicious Code:</strong> Software diseñado para dañar.</li>
+            </ul>
+          </td></tr>
+          <tr><th>Vector de Ataque</th><td>Actualización firmada legítimamente con Payload malicioso.</td></tr>
+          <tr><th>Impacto</th><td>Violación de confianza, acceso masivo a clientes.</td></tr>
+          <tr><th>Control</th><td>Verificación independiente de hashes, monitoreo de comportamiento.</td></tr>
+        </table>
+      </div>
+
+      <div class="scenario-card">
+        <div class="scenario-title"><span>CASE_04: PHISHING & PERSISTENCE</span> <span>[HIGH SEVERITY]</span></div>
+        <p>Atacantes obtuvieron credenciales válidas y mantuvieron acceso por meses sin levantar alertas.</p>
+        <table class="tech-table">
+          <tr><th>Servicios X.800</th><td class="highlight">Autenticación, Control de Acceso</td></tr>
+          <tr><th>Definiciones RFC 4949</th><td>
+            <ul class="def-list">
+                <li><strong>Credential Compromise:</strong> Robo de credenciales válidas.</li>
+                <li><strong>Authentication Failure:</strong> Falla conceptual (el sistema aceptó al atacante).</li>
+            </ul>
+          </td></tr>
+          <tr><th>Vector de Ataque</th><td>Phishing + Uso prolongado de accesos legítimos.</td></tr>
+          <tr><th>Impacto</th><td>Acceso persistente, pérdida de control de sistemas.</td></tr>
+          <tr><th>Control</th><td>MFA (FIDO2), análisis de comportamiento de usuarios (UEBA).</td></tr>
+        </table>
+      </div>
+
+      <div class="scenario-card">
+        <div class="scenario-title"><span>CASE_05: BACKUP DESTRUCTION</span> <span>[CRITICAL]</span></div>
+        <p>Eliminación o cifrado de respaldos antes del ataque principal para impedir la recuperación.</p>
+        <table class="tech-table">
+          <tr><th>Servicios X.800</th><td class="highlight">Disponibilidad, Integridad</td></tr>
+          <tr><th>Definiciones RFC 4949</th><td>
+            <ul class="def-list">
+                <li><strong>Availability Attack:</strong> Acción deliberada para impedir acceso.</li>
+                <li><strong>Data Destruction:</strong> Eliminación intencional de datos.</li>
+            </ul>
+          </td></tr>
+          <tr><th>Vector de Ataque</th><td>Borrado de backups previos al cifrado.</td></tr>
+          <tr><th>Impacto</th><td>Pérdida total de capacidad de recuperación. Catastrófico.</td></tr>
+          <tr><th>Control</th><td>Respaldos Offline (Air-gapped) o inmutables.</td></tr>
+        </table>
+      </div>
+
+      <div class="scenario-card">
+        <div class="scenario-title"><span>CASE_06: INSIDER THREAT</span> <span>[MED SEVERITY]</span></div>
+        <p>Empleado con acceso legítimo extrajo y vendió bases de datos. Abuso de confianza.</p>
+        <table class="tech-table">
+          <tr><th>Servicios X.800</th><td class="highlight">Confidencialidad, Control de Acceso</td></tr>
+          <tr><th>Definiciones RFC 4949</th><td>
+            <ul class="def-list">
+                <li><strong>Insider Threat:</strong> Amenaza originada por entidad interna autorizada.</li>
+                <li><strong>Excessive Privilege:</strong> Asignación de permisos superiores a lo necesario.</li>
+            </ul>
+          </td></tr>
+          <tr><th>Vector de Ataque</th><td>Abuso deliberado de privilegios legítimos.</td></tr>
+          <tr><th>Impacto</th><td>Exfiltración masiva, pérdida de confianza.</td></tr>
+          <tr><th>Control</th><td>Segregación de funciones, DLP (Data Loss Prevention).</td></tr>
+        </table>
+      </div>
+
+      <div class="scenario-card">
+        <div class="scenario-title"><span>CASE_07: LOG ALTERATION</span> <span>[HIGH SEVERITY]</span></div>
+        <p>Cifrado o modificación de logs para impedir análisis forense y borrar huellas.</p>
+        <table class="tech-table">
+          <tr><th>Servicios X.800</th><td class="highlight">Integridad, No Repudio</td></tr>
+          <tr><th>Definiciones RFC 4949</th><td>
+            <ul class="def-list">
+                <li><strong>Non-Repudiation:</strong> Garantía de no poder negar autoría.</li>
+                <li><strong>Evidentiary Integrity:</strong> Valor probatorio de la evidencia digital.</li>
+                <li><strong>Audit Trail:</strong> Registro cronológico de eventos.</li>
+            </ul>
+          </td></tr>
+          <tr><th>Vector de Ataque</th><td>Modificación de registros del sistema (logs).</td></tr>
+          <tr><th>Impacto</th><td>Imposibilidad de forense, pérdida de evidencia legal.</td></tr>
+          <tr><th>Control</th><td>Envío de logs a servidor remoto seguro (SIEM) en tiempo real.</td></tr>
+        </table>
+      </div>
+
+      <div class="scenario-card">
+        <div class="scenario-title"><span>CASE_08: OPERATIONAL FAILURE</span> <span>[HIGH SEVERITY]</span></div>
+        <p>Actualización defectuosa (tipo CrowdStrike) provocó caída global de servicios.</p>
+        <table class="tech-table">
+          <tr><th>Servicios X.800</th><td class="highlight">Disponibilidad</td></tr>
+          <tr><th>Definiciones RFC 4949</th><td>
+            <ul class="def-list">
+                <li><strong>Availability:</strong> Propiedad de estar accesible cuando se requiere.</li>
+                <li><strong>Operational Failure:</strong> Falla por error interno (no ataque malicioso).</li>
+            </ul>
+          </td></tr>
+          <tr><th>Vector de Ataque</th><td>Falla operacional interna (Update sin testing).</td></tr>
+          <tr><th>Impacto</th><td>Interrupción simultánea crítica a escala global.</td></tr>
+          <tr><th>Control</th><td>Pruebas en Staging, mecanismos de Rollback automáticos.</td></tr>
+        </table>
+      </div>
+
+       <div class="scenario-card">
+        <div class="scenario-title"><span>CASE_09: SITE CLONING (PHISHING)</span> <span>[MED SEVERITY]</span></div>
+        <p>Replica de sitios oficiales para engañar ciudadanos. Suplantación de identidad.</p>
+        <table class="tech-table">
+          <tr><th>Servicios X.800</th><td class="highlight">Autenticación, Confidencialidad</td></tr>
+          <tr><th>Definiciones RFC 4949</th><td>
+            <ul class="def-list">
+                <li><strong>Masquerade:</strong> Entidad que se hace pasar por otra legítima.</li>
+                <li><strong>Phishing:</strong> Ingeniería social mediante engaño.</li>
+            </ul>
+          </td></tr>
+          <tr><th>Vector de Ataque</th><td>Sitios web falsificados (Typosquatting).</td></tr>
+          <tr><th>Impacto</th><td>Robo de credenciales y datos personales.</td></tr>
+          <tr><th>Control</th><td>Autenticación de dominio, concientización de usuarios.</td></tr>
+        </table>
+      </div>
+
+      <div class="scenario-card">
+        <div class="scenario-title"><span>CASE_10: DESTRUCTIVE ATTACK</span> <span>[CRITICAL]</span></div>
+        <p>Acciones destructivas para borrar sistemas completos tras exfiltración (Wiper Malware).</p>
+        <table class="tech-table">
+          <tr><th>Servicios X.800</th><td class="highlight">Confidencialidad, Integridad, Disponibilidad</td></tr>
+          <tr><th>Definiciones RFC 4949</th><td>
+            <ul class="def-list">
+                <li><strong>Destructive Attack:</strong> Objetivo principal es daño irreversible.</li>
+                <li><strong>Integrity:</strong> Sistemas destruidos de manera no autorizada.</li>
+            </ul>
+          </td></tr>
+          <tr><th>Vector de Ataque</th><td>Exfiltración seguida de Wiping (Borrado seguro).</td></tr>
+          <tr><th>Impacto</th><td>Pérdida irreversible, colapso operativo total.</td></tr>
+          <tr><th>Control</th><td>Segmentación crítica, plan de recuperación de desastres (DRP).</td></tr>
+        </table>
+      </div>
+
+      <div style="text-align:center;">
+        <a href="../assets/177876-act2.pdf" target="_blank" class="pdf-btn">[ DESCARGAR PDF CON TABLAS ]</a>
+      </div>
+
+    </div>
+  </article>
+
+  <footer>
+    <p>© 2026 BRUNO LUNA | UPSLP - SEGURIDAD INFORMÁTICA</p>
+  </footer>
+
+</main>
+
+</body>
+</html>

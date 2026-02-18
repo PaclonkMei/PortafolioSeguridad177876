@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ACT-06 :: OPERATION BAYONET</title>
+  
+  <link rel="icon" type="image/png" href="../assets/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-void: #050508;
+      --zsnes-top: #5a6885;
+      --zsnes-bottom: #212536;
+      --metal-light: #8a9bb8;
+      --metal-dark: #12141d;
+      --text-main: #d1d5db;
+      --text-dim: #9ca3af;
+      --accent-red: #ef4444;    /* Alerta / Criminal */
+      --accent-gold: #facc15;   /* Evidencia */
+      --accent-blue: #8ab4f8;   /* Info General */
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-void);
+      color: var(--text-main);
+      font-family: 'VT323', monospace;
+      font-size: 21px;
+      line-height: 1.6;
+      padding-top: 60px;
+      overflow-x: hidden;
+    }
+
+    /* CRT SCANLINES */
+    .crt-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+      background-size: 100% 4px; pointer-events: none; z-index: 9999;
+    }
+
+    /* NAVBAR */
+    .zsnes-bar {
+      position: fixed; top: 0; left: 0; width: 100%; height: 45px;
+      background: linear-gradient(180deg, var(--zsnes-top) 0%, var(--zsnes-bottom) 100%);
+      border-bottom: 2px solid var(--metal-dark);
+      display: flex; align-items: center; padding: 0 1rem; z-index: 1000;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      font-family: 'Space Mono', monospace; font-size: 0.85rem;
+    }
+
+    .nav-link {
+      color: #fff; text-decoration: none; margin-right: 20px; font-weight: bold;
+      text-transform: uppercase; letter-spacing: 1px;
+    }
+    .nav-link:hover { color: var(--accent-red); }
+
+    /* LAYOUT */
+    main { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+
+    .report-header {
+      text-align: center; border-bottom: 2px dashed #444; padding-bottom: 2rem; margin-bottom: 3rem;
+    }
+    .report-header h1 { font-size: 3rem; color: var(--accent-red); margin: 0; text-shadow: 4px 4px 0 #000; }
+    .stamp { 
+        border: 2px solid var(--accent-red); color: var(--accent-red); padding: 5px 15px; 
+        font-family: 'Space Mono'; font-weight: bold; display: inline-block; transform: rotate(-5deg);
+        margin-bottom: 1rem; font-size: 1.2rem;
+    }
+
+    /* WINDOW FRAMES */
+    .window-frame {
+      background: #0a0a0f; border: 2px solid #333; margin-bottom: 3rem;
+      border-top-color: var(--metal-light); border-left-color: var(--metal-light);
+      border-right-color: var(--metal-dark); border-bottom-color: var(--metal-dark);
+    }
+    .window-bar {
+      background: linear-gradient(90deg, var(--zsnes-bottom), #000); padding: 5px 15px;
+      border-bottom: 2px solid #333; display: flex; justify-content: space-between; align-items: center;
+      font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--accent-red); letter-spacing: 1px;
+    }
+    .window-content { padding: 2rem; }
+
+    /* EVIDENCE LISTS */
+    .evidence-list { list-style: none; padding: 0; }
+    .evidence-item { 
+        margin-bottom: 1.5rem; border-left: 3px solid #333; padding-left: 1rem; 
+        transition: border-color 0.3s;
+    }
+    .evidence-item:hover { border-left-color: var(--accent-red); }
+    
+    .question { 
+        color: #888; font-family: 'Space Mono'; font-size: 0.85rem; text-transform: uppercase; margin-bottom: 5px; 
+    }
+    .answer { color: #fff; font-size: 1.1rem; }
+    .highlight { color: var(--accent-red); font-weight: bold; }
+
+    /* MUGSHOT / PROFILE PLACEHOLDER */
+    .profile-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; margin-bottom: 2rem; }
+    .mugshot {
+        background: #111; border: 1px solid #444; display: flex; align-items: center; justify-content: center;
+        height: 200px; color: #333; font-family: 'Space Mono'; text-align: center;
+    }
+
+    /* FOOTER */
+    footer { text-align: center; padding: 3rem; color: #555; font-size: 0.9rem; border-top: 1px solid #222; margin-top: 3rem; }
+    .pdf-btn {
+        display: inline-block; background: var(--accent-red); color: #000; padding: 10px 20px;
+        text-decoration: none; font-weight: bold; font-family: 'Space Mono'; margin-top: 2rem;
+        border: 2px solid #fff;
+    }
+    .pdf-btn:hover { background: #fff; color: var(--accent-red); }
+
+    /* RESPONSIVE */
+    @media (max-width: 600px) { .profile-grid { grid-template-columns: 1fr; } }
+
+  </style>
+</head>
+<body>
+
+<div class="crt-overlay"></div>
+
+<nav class="zsnes-bar">
+    <a href="../parcial1.html" class="nav-link"><< RETURN TO INDEX</a>
+    <span style="margin-left:auto; color:#aaa; font-family:'Space Mono'">FILE: ACT06_OXYMONSTER.HTML</span>
+</nav>
+
+<main>
+
+  <header class="report-header">
+    <div class="stamp">CASE CLOSED</div>
+    <h1>OPERATION BAYONET</h1>
+    <p style="font-size: 1.2rem; color: #fff; margin-top: 1rem;">TARGET: OXYMONSTER (DREAM MARKET ADMIN)</p>
+  </header>
+
+  <article class="window-frame">
+    <div class="window-bar">
+      <span>/INTEL/TARGET_PROFILE.DAT</span>
+      <div class="window-controls"><span></span><span></span></div>
+    </div>
+    <div class="window-content">
+      <div class="profile-grid">
+        <div class="mugshot">
+            [ IMG_404 ]<br>GAL VALLERIUS
+        </div>
+        <div>
+            <ul class="evidence-list">
+                <li class="evidence-item">
+                    <div class="question">11. Identidad Real</div>
+                    <div class="answer"><span class="highlight">Gal Vallerius</span></div>
+                </li>
+                <li class="evidence-item">
+                    <div class="question">Alias en Dark Web</div>
+                    <div class="answer">OxyMonster</div>
+                </li>
+                <li class="evidence-item">
+                    <div class="question">8. Inicio de Actividades</div>
+                    <div class="answer">Mayo 2015</div>
+                </li>
+                <li class="evidence-item">
+                    <div class="question">9. Ascenso al Poder</div>
+                    <div class="answer">Tardó solo <strong>7 meses</strong> en obtener el rol de Administrador/Moderador Senior.</div>
+                </li>
+            </ul>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <article class="window-frame">
+    <div class="window-bar">
+      <span>/LOGS/OPERATION_DETAILS.LOG</span>
+      <div class="window-controls"><span></span><span></span></div>
+    </div>
+    <div class="window-content">
+      <h2>Detalles de la Investigación</h2>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+        
+        <div>
+            <div class="question">1. Agencias Involucradas</div>
+            <div class="answer" style="margin-bottom: 1.5rem;">DEA (Drug Enforcement Administration) y FBI.</div>
+
+            <div class="question">2. Nombre de la Operación</div>
+            <div class="answer" style="margin-bottom: 1.5rem;">Operación <span class="highlight">Bayoneta</span> (Operation Bayonet).</div>
+
+            <div class="question">3. Mercado Objetivo</div>
+            <div class="answer" style="margin-bottom: 1.5rem;">Dream Market (Mercado de venta de drogas y bienes ilícitos).</div>
+            
+            <div class="question">5. Principal Producto</div>
+            <div class="answer">Fentanilo y Opioides.</div>
+        </div>
+
+        <div>
+            <div class="question">4. Sistema de Reputación</div>
+            <div class="answer" style="margin-bottom: 1.5rem;">Basado en <strong>reseñas internas</strong> de usuarios dentro del sitio (Similar a e-commerce legal).</div>
+
+            <div class="question">6. Sistema "Escrow"</div>
+            <div class="answer" style="margin-bottom: 1.5rem;">Mecanismo de garantía donde el dinero se queda en un <strong>depósito intermedio</strong> hasta que el comprador confirma la recepción del producto.</div>
+
+            <div class="question">7. Proceso "The Mixer" (Tumbler)</div>
+            <div class="answer">Servicio para <strong>anonimizar bitcoins</strong> mezclándolos con fondos de otras fuentes para borrar el rastro de la actividad ilícita.</div>
+        </div>
+
+      </div>
+    </div>
+  </article>
+
+  <article class="window-frame">
+    <div class="window-bar">
+      <span>/EVIDENCE/ARREST_WARRANT.TXT</span>
+      <div class="window-controls"><span></span><span></span></div>
+    </div>
+    <div class="window-content">
+      <h2 style="color:var(--accent-red)">Fallas de Seguridad (OPSEC)</h2>
+      
+      <ul class="evidence-list">
+        <li class="evidence-item">
+            <div class="question">10. El Error Crítico</div>
+            <div class="answer">
+                Exceso de confianza. <span class="highlight">No usó un Mixer</span> para ciertas transacciones y transfirió fondos a su cuenta personal en <strong>LocalBitcoins</strong>.
+            </div>
+        </li>
+        <li class="evidence-item">
+            <div class="question">12. Vinculación (Digital)</div>
+            <div class="answer">
+                Análisis de estilometría (forma de escribir). Los agentes compararon sus comentarios en redes sociales (Instagram/Twitter) con los posts de "OxyMonster" en la Dark Web. Además, el rastro de la Blockchain desde Dream Market hasta su cartera en LocalBitcoins confirmó su identidad.
+            </div>
+        </li>
+        <li class="evidence-item">
+            <div class="question">13. La Prueba Definitiva (Física)</div>
+            <div class="answer">
+                Fue arrestado en el aeropuerto de Atlanta al viajar desde Francia para un concurso de barbas y bigotes. Al revisar su <strong>Laptop</strong> en aduanas, encontraron la sesión de Tor abierta y las <strong>claves PGP privadas</strong> de OxyMonster, confirmando su identidad sin dudas.
+            </div>
+        </li>
+      </ul>
+
+      <div style="text-align:center;">
+        <a href="../assets/177876-act6.jpg" target="_blank" class="pdf-btn">[ VER NOTAS ORIGINALES (MANUSCRITO) ]</a>
+      </div>
+
+    </div>
+  </article>
+
+  <footer>
+    <p>© 2026 BRUNO LUNA | UPSLP - SEGURIDAD INFORMÁTICA</p>
+  </footer>
+
+</main>
+
+</body>
+</html>

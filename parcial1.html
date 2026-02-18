@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PARCIAL 1 :: MISSION SELECT</title>
+  
+  <link rel="icon" type="image/png" href="../assets/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      /* PALETA PRINCIPAL */
+      --bg-void: #050508;
+      --zsnes-top: #5a6885;
+      --zsnes-bottom: #212536;
+      --metal-light: #8a9bb8;
+      --metal-dark: #12141d;
+      --text-main: #d1d5db;
+      --text-dim: #6b7280;
+      --accent-cold: #8ab4f8; 
+      --accent-alert: #cd5c5c;
+      --accent-success: #4ade80;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-void);
+      color: var(--text-main);
+      font-family: 'VT323', monospace;
+      font-size: 21px;
+      line-height: 1.5;
+      padding-top: 50px;
+      overflow-x: hidden;
+    }
+
+    /* --- CRT OVERLAY --- */
+    .crt-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+      background-size: 100% 4px;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* --- NAVBAR ZSNES --- */
+    .zsnes-bar {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 40px;
+      background: linear-gradient(180deg, var(--zsnes-top) 0%, var(--zsnes-bottom) 100%);
+      border-bottom: 2px solid var(--metal-dark);
+      display: flex;
+      align-items: center;
+      padding: 0 1rem;
+      z-index: 1000;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+    }
+
+    .nav-btn {
+        color: white;
+        text-decoration: none;
+        margin-right: 1.5rem;
+        font-weight: bold;
+        padding: 5px 10px;
+    }
+    .nav-btn:hover {
+        background: rgba(255,255,255,0.15);
+        color: var(--accent-cold);
+    }
+
+    /* --- LAYOUT --- */
+    main { max-width: 900px; margin: 3rem auto; padding: 0 1rem; }
+
+    .header-section {
+        text-align: center;
+        margin-bottom: 2rem;
+        border-bottom: 2px dashed #333;
+        padding-bottom: 1rem;
+    }
+
+    h1 {
+        color: var(--accent-cold);
+        font-size: 3rem;
+        text-shadow: 3px 3px 0px var(--zsnes-bottom);
+        margin: 0;
+    }
+
+    /* --- WINDOW FRAME --- */
+    .window-frame {
+      background: #0c0c12;
+      border: 2px solid var(--text-dim);
+      margin-bottom: 3rem;
+      border-top-color: var(--metal-light);
+      border-left-color: var(--metal-light);
+      border-right-color: var(--metal-dark);
+      border-bottom-color: var(--metal-dark);
+    }
+
+    .window-bar {
+      background: linear-gradient(90deg, var(--zsnes-bottom), #000);
+      padding: 4px 10px;
+      border-bottom: 2px solid var(--text-dim);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--accent-cold);
+      letter-spacing: 1px;
+    }
+
+    .window-content { padding: 1.5rem; }
+
+    /* --- LISTA DE MISIONES (ÍNDICE DE ACTIVIDADES) --- */
+    .mission-list {
+        list-style: none;
+        display: grid;
+        gap: 1.5rem;
+    }
+
+    .mission-item {
+        background: rgba(20, 20, 30, 0.5);
+        border: 1px solid #333;
+        padding: 1.2rem;
+        position: relative;
+        transition: all 0.2s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .mission-item:hover {
+        border-color: var(--accent-cold);
+        background: rgba(20, 20, 30, 0.8);
+        transform: translateX(5px);
+        box-shadow: -4px 4px 0px var(--zsnes-bottom);
+    }
+
+    .mission-header {
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 1px dashed #444;
+        padding-bottom: 0.5rem;
+        margin-bottom: 0.8rem;
+        font-family: 'Space Mono', monospace;
+        font-size: 0.8rem;
+        color: var(--text-dim);
+    }
+
+    .mission-title {
+        font-size: 1.4rem;
+        color: var(--text-main);
+        margin-bottom: 0.5rem;
+    }
+
+    .mission-item:hover .mission-title {
+        color: var(--accent-cold);
+    }
+
+    .mission-desc {
+        font-size: 1rem;
+        color: #888;
+        margin-bottom: 1rem;
+        flex-grow: 1;
+    }
+
+    .btn-action {
+        align-self: flex-start;
+        background: var(--metal-dark);
+        color: var(--accent-cold);
+        border: 1px solid var(--metal-light);
+        padding: 5px 15px;
+        text-decoration: none;
+        font-family: 'Space Mono', monospace;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        display: inline-block;
+    }
+
+    .btn-action:hover {
+        background: var(--accent-cold);
+        color: var(--bg-void);
+    }
+
+    .tag {
+        background: #222;
+        padding: 2px 6px;
+        border-radius: 2px;
+        margin-left: 5px;
+        color: #aaa;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      border-top: 1px solid #222;
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="crt-overlay"></div>
+
+<nav class="zsnes-bar">
+    <a href="index.html" class="nav-btn">
+        < [BACK TO MAIN]
+    </a>
+    <span style="color:white; font-family:'Space Mono'; margin-left:auto;">
+        CURRENT_DIR: /HOME/PARCIAL_1
+    </span>
+</nav>
+
+<main>
+  
+  <header class="header-section">
+    <h1>PARCIAL 1</h1>
+    <p style="font-family:'Space Mono'; color:#666;">[ SELECCIÓN DE ACTIVIDADES ]</p>
+  </header>
+
+  <article class="window-frame">
+    <div class="window-bar">
+      <span>/LIST/ACTIVITIES_INDEX.LOG</span>
+      <div class="window-controls"><span></span><span></span></div>
+    </div>
+    
+    <div class="window-content">
+      <ul class="mission-list">
+
+        <li class="mission-item">
+            <div class="mission-header">
+                <span>ID: ACT-01</span>
+                <span>TYPE: <span class="tag" style="color:var(--accent-alert)">CASE STUDY</span></span>
+            </div>
+            <div class="mission-title">Análisis Ciberataque: Colonial Pipeline</div>
+            <div class="mission-desc">
+                Investigación forense sobre el ataque de Ransomware (DarkSide) que paralizó la infraestructura crítica. Análisis de impacto y fallos de seguridad.
+            </div>
+            <a href="activities/177876-act1.html" class="btn-action">EXECUTE_READ >></a>
+        </li>
+
+        <li class="mission-item">
+            <div class="mission-header">
+                <span>ID: ACT-02</span>
+                <span>TYPE: <span class="tag" style="color:#a855f7">NORMATIVA</span></span>
+            </div>
+            <div class="mission-title">Servicios de Seguridad (RFC 4949 / X.800)</div>
+            <div class="mission-desc">
+                Desglose de escenarios de seguridad aplicando definiciones estandarizadas y arquitectura OSI de seguridad.
+            </div>
+            <a href="activities/177876-act2.html" class="btn-action">EXECUTE_READ >></a>
+        </li>
+
+        <li class="mission-item">
+            <div class="mission-header">
+                <span>ID: ACT-03</span>
+                <span>TYPE: <span class="tag" style="color:#eab308">LAB/LOGIC</span></span>
+            </div>
+            <div class="mission-title">Interpretación de IPTABLES</div>
+            <div class="mission-desc">
+                Traducción de comandos de firewall en Linux. Análisis de tablas, cadenas y reglas de filtrado de paquetes.
+            </div>
+            <a href="activities/177876-act3.html" class="btn-action">EXECUTE_READ >></a>
+        </li>
+
+        <li class="mission-item">
+            <div class="mission-header">
+                <span>ID: ACT-04</span>
+                <span>TYPE: <span class="tag" style="color:var(--accent-success)">DEFENSE</span></span>
+            </div>
+            <div class="mission-title">Mecanismos de Defensa en Red</div>
+            <div class="mission-desc">
+                Implementación de reglas de Hardening en Iptables para proteger servicios Web, Correo y DNS bajo una topología segura.
+            </div>
+            <a href="activities/177876-act4.html" class="btn-action">EXECUTE_READ >></a>
+        </li>
+
+        <li class="mission-item">
+            <div class="mission-header">
+                <span>ID: ACT-05</span>
+                <span>TYPE: <span class="tag" style="color:var(--accent-cold)">INTEL</span></span>
+            </div>
+            <div class="mission-title">Cartografía del Pentesting</div>
+            <div class="mission-desc">
+                Comparativa estratégica de metodologías de seguridad: MITRE ATT&CK, OWASP, NIST, PTES y OSSTMM.
+            </div>
+            <a href="activities/177876-act5.html" class="btn-action">EXECUTE_READ >></a>
+        </li>
+
+        <li class="mission-item">
+            <div class="mission-header">
+                <span>ID: ACT-06</span>
+                <span>TYPE: <span class="tag" style="color:var(--accent-alert)">FORENSICS</span></span>
+            </div>
+            <div class="mission-title">Dark Web Case: OxyMonster</div>
+            <div class="mission-desc">
+                Análisis de la operación "Bayoneta" y la captura de Gal Vallerius. Errores de OPSEC en mercados ilegales.
+            </div>
+            <a href="activities/177876-act6.html" class="btn-action">EXECUTE_READ >></a>
+        </li>
+
+      </ul>
+    </div>
+  </article>
+
+</main>
+
+<footer>
+  <p>© 2026 BRUNO LUNA | CNO V SEGURIDAD INFORMÁTICA</p>
+</footer>
+
+</body>
+</html>

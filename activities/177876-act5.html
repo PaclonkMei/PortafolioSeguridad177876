@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ACT-05 :: PENTESTING FRAMEWORKS</title>
+  
+  <link rel="icon" type="image/png" href="../assets/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-void: #050508;
+      --zsnes-top: #5a6885;
+      --zsnes-bottom: #212536;
+      --metal-light: #8a9bb8;
+      --metal-dark: #12141d;
+      --text-main: #d1d5db;
+      --text-dim: #9ca3af;
+      --accent-cyan: #22d3ee;
+      --accent-pink: #e879f9;
+      --accent-yellow: #facc15;
+      --accent-green: #4ade80;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-void);
+      color: var(--text-main);
+      font-family: 'VT323', monospace;
+      font-size: 20px;
+      line-height: 1.6;
+      padding-top: 60px;
+      overflow-x: hidden;
+    }
+
+    /* CRT SCANLINES */
+    .crt-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+      background-size: 100% 4px; pointer-events: none; z-index: 9999;
+    }
+
+    /* NAVBAR */
+    .zsnes-bar {
+      position: fixed; top: 0; left: 0; width: 100%; height: 45px;
+      background: linear-gradient(180deg, var(--zsnes-top) 0%, var(--zsnes-bottom) 100%);
+      border-bottom: 2px solid var(--metal-dark);
+      display: flex; align-items: center; padding: 0 1rem; z-index: 1000;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      font-family: 'Space Mono', monospace; font-size: 0.85rem;
+    }
+
+    .nav-link {
+      color: #fff; text-decoration: none; margin-right: 20px; font-weight: bold;
+      text-transform: uppercase; letter-spacing: 1px;
+    }
+    .nav-link:hover { color: var(--accent-cyan); }
+
+    /* LAYOUT */
+    main { max-width: 1100px; margin: 2rem auto; padding: 0 1rem; }
+
+    .report-header {
+      text-align: center; border-bottom: 2px dashed #444; padding-bottom: 2rem; margin-bottom: 3rem;
+    }
+    .report-header h1 { font-size: 3rem; color: var(--accent-cyan); margin: 0; text-shadow: 4px 4px 0 #000; }
+    .meta-tag { background: #222; padding: 2px 8px; font-family: 'Space Mono'; font-size: 0.8rem; color: #aaa; border: 1px solid #444; }
+
+    /* WINDOW FRAMES */
+    .window-frame {
+      background: #0a0a0f; border: 2px solid #333; margin-bottom: 3rem;
+      border-top-color: var(--metal-light); border-left-color: var(--metal-light);
+      border-right-color: var(--metal-dark); border-bottom-color: var(--metal-dark);
+    }
+    .window-bar {
+      background: linear-gradient(90deg, var(--zsnes-bottom), #000); padding: 5px 15px;
+      border-bottom: 2px solid #333; display: flex; justify-content: space-between; align-items: center;
+      font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--accent-cyan); letter-spacing: 1px;
+    }
+    .window-content { padding: 2rem; }
+
+    /* FRAMEWORK CARDS */
+    .framework-grid {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;
+    }
+    .fw-card {
+        background: rgba(255,255,255,0.03); border: 1px solid #333; padding: 1.5rem;
+        transition: transform 0.2s; position: relative; overflow: hidden;
+    }
+    .fw-card:hover { border-color: var(--accent-cyan); transform: translateY(-5px); }
+    .fw-title {
+        color: var(--accent-cyan); font-family: 'Space Mono'; font-weight: bold; font-size: 1.1rem;
+        border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 15px;
+    }
+    .fw-desc { font-size: 0.95rem; color: #ccc; margin-bottom: 1rem; }
+    .fw-badge {
+        display: inline-block; font-size: 0.75rem; padding: 2px 6px; border-radius: 4px;
+        background: #222; color: #aaa; margin-right: 5px; font-family: 'Space Mono'; border: 1px solid #444;
+    }
+
+    /* COMPARISON TABLE */
+    .comp-table { width: 100%; border-collapse: collapse; font-family: 'Space Mono', monospace; font-size: 0.75rem; margin-top: 1rem; }
+    .comp-table th { background: #15151a; color: var(--accent-cyan); padding: 10px; border: 1px solid #333; text-align: left; }
+    .comp-table td { border: 1px solid #333; padding: 10px; vertical-align: top; color: #ccc; }
+    .comp-table tr:hover td { background: rgba(34, 211, 238, 0.05); }
+
+    /* FOOTER */
+    footer { text-align: center; padding: 3rem; color: #555; font-size: 0.9rem; border-top: 1px solid #222; margin-top: 3rem; }
+    .pdf-btn {
+        display: inline-block; background: var(--accent-cyan); color: #000; padding: 10px 20px;
+        text-decoration: none; font-weight: bold; font-family: 'Space Mono'; margin-top: 2rem;
+        border: 2px solid #fff;
+    }
+    .pdf-btn:hover { background: #fff; color: var(--accent-cyan); }
+
+  </style>
+</head>
+<body>
+
+<div class="crt-overlay"></div>
+
+<nav class="zsnes-bar">
+    <a href="../parcial1.html" class="nav-link"><< RETURN TO INDEX</a>
+    <span style="margin-left:auto; color:#aaa; font-family:'Space Mono'">FILE: ACT05_METHODOLOGIES.HTML</span>
+</nav>
+
+<main>
+
+  <header class="report-header">
+    <span class="meta-tag">14 FEB 2026</span>
+    <span class="meta-tag">CNO V</span>
+    <span class="meta-tag">177876</span>
+    <h1>CARTOGRAFÍA DEL PENTESTING</h1>
+    <p style="font-size: 1.2rem; color: #fff; margin-top: 1rem;">ANÁLISIS COMPARATIVO DE METODOLOGÍAS Y MARCOS DE TRABAJO</p>
+  </header>
+
+  <article class="window-frame">
+    <div class="window-bar">
+      <span>/DB/FRAMEWORKS_INTEL.JSON</span>
+      <div class="window-controls"><span></span><span></span></div>
+    </div>
+    <div class="window-content">
+      <div class="framework-grid">
+        
+        <div class="fw-card">
+            <div class="fw-title">MITRE ATT&CK</div>
+            <p class="fw-desc">Base de conocimiento de tácticas y técnicas adversarias (TTPs) basada en observaciones del mundo real. No es una metodología secuencial, sino una matriz de comportamiento.</p>
+            <div>
+                <span class="fw-badge">RED TEAM</span>
+                <span class="fw-badge">THREAT HUNTING</span>
+                <span class="fw-badge">DEFENSE</span>
+            </div>
+        </div>
+
+        <div class="fw-card">
+            <div class="fw-title">OWASP WSTG</div>
+            <p class="fw-desc">Guía técnica y checklist exhaustivo para pruebas de seguridad en aplicaciones web y APIs. El estándar de facto para AppSec.</p>
+            <div>
+                <span class="fw-badge">WEB</span>
+                <span class="fw-badge">APPSEC</span>
+                <span class="fw-badge">AUDIT</span>
+            </div>
+        </div>
+
+        <div class="fw-card">
+            <div class="fw-title">NIST SP 800-115</div>
+            <p class="fw-desc">Estándar del gobierno de EE.UU. para pruebas y evaluaciones de seguridad. Enfocado en cumplimiento, auditoría formal y gestión de riesgos.</p>
+            <div>
+                <span class="fw-badge">GOVERNMENT</span>
+                <span class="fw-badge">COMPLIANCE</span>
+                <span class="fw-badge">RISK</span>
+            </div>
+        </div>
+
+        <div class="fw-card">
+            <div class="fw-title">OSSTMM</div>
+            <p class="fw-desc">Metodología científica para medir la seguridad operativa (OpSec). Cubre seguridad física, humana, telecomunicaciones y redes con métricas objetivas.</p>
+            <div>
+                <span class="fw-badge">METRICS</span>
+                <span class="fw-badge">OPSEC</span>
+                <span class="fw-badge">PHYSICAL</span>
+            </div>
+        </div>
+
+        <div class="fw-card">
+            <div class="fw-title">PTES</div>
+            <p class="fw-desc">Estándar de ejecución que define el ciclo de vida completo de un Pentest: desde el acuerdo inicial (Pre-engagement) hasta el reporte final.</p>
+            <div>
+                <span class="fw-badge">PENTESTING</span>
+                <span class="fw-badge">EXECUTION</span>
+                <span class="fw-badge">PROCESS</span>
+            </div>
+        </div>
+
+        <div class="fw-card">
+            <div class="fw-title">ISSAF</div>
+            <p class="fw-desc">Marco estructurado (algo antiguo) que clasifica la evaluación de seguridad en dominios específicos con criterios detallados de prueba.</p>
+            <div>
+                <span class="fw-badge">LEGACY</span>
+                <span class="fw-badge">STRUCTURED</span>
+                <span class="fw-badge">ASSESSMENT</span>
+            </div>
+        </div>
+
+      </div>
+    </div>
+  </article>
+
+  <article class="window-frame">
+    <div class="window-bar">
+      <span>/BIN/COMPARE_MATRIX.CSV</span>
+      <div class="window-controls"><span></span><span></span></div>
+    </div>
+    <div class="window-content" style="overflow-x: auto;">
+      <h2>Matriz Comparativa Estratégica</h2>
+      <table class="comp-table">
+        <thead>
+            <tr>
+                <th>METODOLOGÍA</th>
+                <th>ENFOQUE PRINCIPAL</th>
+                <th>FASES / ESTRUCTURA</th>
+                <th>ORIENTACIÓN</th>
+                <th>USO COMÚN</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td style="color:#fff; font-weight:bold;">MITRE ATT&CK</td>
+                <td>Comportamiento Adversario (TTPs)</td>
+                <td>Matrices de Tácticas y Técnicas (No secuencial)</td>
+                <td>Ofensiva (Red Team) & Defensiva (Blue Team)</td>
+                <td>Emulación de adversarios, mejora de detección (SOC).</td>
+            </tr>
+            <tr>
+                <td style="color:#fff; font-weight:bold;">OWASP WSTG</td>
+                <td>Seguridad en Aplicaciones Web</td>
+                <td>Checklist de pruebas por categorías (Auth, Session, Input...)</td>
+                <td>Evaluación Técnica</td>
+                <td>Pentesting Web, Auditoría de Código, QA.</td>
+            </tr>
+            <tr>
+                <td style="color:#fff; font-weight:bold;">NIST SP 800-115</td>
+                <td>Estándar Gubernamental / Cumplimiento</td>
+                <td>Planificación -> Descubrimiento -> Ataque -> Reporte</td>
+                <td>Evaluación / Auditoría</td>
+                <td>Auditorías formales, FISMA, Entorno Corporativo.</td>
+            </tr>
+            <tr>
+                <td style="color:#fff; font-weight:bold;">OSSTMM</td>
+                <td>Seguridad Operacional (OpSec)</td>
+                <td>Módulos por canales (Humano, Físico, Wireless...)</td>
+                <td>Evaluación Defensiva (Métricas)</td>
+                <td>Auditoría integral, Medición de postura de seguridad.</td>
+            </tr>
+            <tr>
+                <td style="color:#fff; font-weight:bold;">PTES</td>
+                <td>Proceso de Ejecución de Pentest</td>
+                <td>7 Fases: Pre-acuerdo -> Intel -> Amenazas -> Vulns -> Exploit -> Post -> Reporte</td>
+                <td>Ataque (Pentesting)</td>
+                <td>Guía paso a paso para ejecutar un Pentest comercial.</td>
+            </tr>
+            <tr>
+                <td style="color:#fff; font-weight:bold;">ISSAF</td>
+                <td>Marco de Evaluación Estructurado</td>
+                <td>Planificación -> Evaluación -> Reporte (Por dominios)</td>
+                <td>Evaluación</td>
+                <td>Referencia para checklists detallados (Histórico).</td>
+            </tr>
+        </tbody>
+      </table>
+
+      <div style="text-align:center;">
+        <a href="../assets/177876-act5.pdf" target="_blank" class="pdf-btn">[ DESCARGAR DOCUMENTO ORIGINAL ]</a>
+      </div>
+
+    </div>
+  </article>
+
+  <footer>
+    <p>REFERENCIAS: MITRE.ORG, OWASP.ORG, NIST.GOV, ISECOM.ORG, PENTEST-STANDARD.ORG</p>
+    <p>© 2026 BRUNO LUNA | UPSLP - SEGURIDAD INFORMÁTICA</p>
+  </footer>
+
+</main>
+
+</body>
+</html>

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ACT-03 :: IPTABLES ANALYSIS</title>
+  
+  <link rel="icon" type="image/png" href="../assets/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-void: #050508;
+      --zsnes-top: #5a6885;
+      --zsnes-bottom: #212536;
+      --metal-light: #8a9bb8;
+      --metal-dark: #12141d;
+      --text-main: #d1d5db;
+      --text-dim: #9ca3af;
+      --accent-blue: #8ab4f8; 
+      --accent-yellow: #facc15;
+      --accent-green: #4ade80;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-void);
+      color: var(--text-main);
+      font-family: 'VT323', monospace;
+      font-size: 20px;
+      line-height: 1.6;
+      padding-top: 60px;
+      overflow-x: hidden;
+    }
+
+    /* CRT SCANLINES */
+    .crt-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+      background-size: 100% 4px; pointer-events: none; z-index: 9999;
+    }
+
+    /* NAVBAR */
+    .zsnes-bar {
+      position: fixed; top: 0; left: 0; width: 100%; height: 45px;
+      background: linear-gradient(180deg, var(--zsnes-top) 0%, var(--zsnes-bottom) 100%);
+      border-bottom: 2px solid var(--metal-dark);
+      display: flex; align-items: center; padding: 0 1rem; z-index: 1000;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      font-family: 'Space Mono', monospace; font-size: 0.85rem;
+    }
+
+    .nav-link {
+      color: #fff; text-decoration: none; margin-right: 20px; font-weight: bold;
+      text-transform: uppercase; letter-spacing: 1px;
+    }
+    .nav-link:hover { color: var(--accent-blue); }
+
+    /* LAYOUT */
+    main { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+
+    .report-header {
+      text-align: center; border-bottom: 2px dashed #444; padding-bottom: 2rem; margin-bottom: 3rem;
+    }
+    .report-header h1 { font-size: 3rem; color: var(--accent-yellow); margin: 0; text-shadow: 4px 4px 0 #000; }
+    .meta-tag { background: #222; padding: 2px 8px; font-family: 'Space Mono'; font-size: 0.8rem; color: #aaa; border: 1px solid #444; }
+
+    /* WINDOW FRAMES */
+    .window-frame {
+      background: #0a0a0f; border: 2px solid #333; margin-bottom: 3rem;
+      border-top-color: var(--metal-light); border-left-color: var(--metal-light);
+      border-right-color: var(--metal-dark); border-bottom-color: var(--metal-dark);
+    }
+    .window-bar {
+      background: linear-gradient(90deg, var(--zsnes-bottom), #000); padding: 5px 15px;
+      border-bottom: 2px solid #333; display: flex; justify-content: space-between; align-items: center;
+      font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--accent-blue); letter-spacing: 1px;
+    }
+    .window-content { padding: 2rem; }
+
+    /* ELEMENTS */
+    h2 { color: var(--accent-blue); border-bottom: 1px solid #333; padding-bottom: 5px; margin: 0 0 1rem 0; font-size: 1.4rem; text-transform: uppercase; }
+    
+    .tech-table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-family: 'Space Mono', monospace; font-size: 0.85rem; }
+    .tech-table th { background: #15151a; color: #aaa; padding: 8px; border: 1px solid #333; text-align: left; }
+    .tech-table td { border: 1px solid #333; padding: 8px; vertical-align: middle; color: var(--text-main); }
+    .tech-table tr:hover td { background: rgba(255,255,255,0.05); }
+
+    .code-block {
+        background: #000; border: 1px solid #333; padding: 1rem; margin: 1rem 0;
+        font-family: 'Space Mono', monospace; font-size: 0.85rem; color: var(--accent-green);
+        overflow-x: auto;
+    }
+    
+    .comment { color: #555; font-style: italic; }
+    .cmd { color: var(--accent-yellow); font-weight: bold; }
+    .param { color: #fff; }
+
+    .qa-box { margin-bottom: 1.5rem; border-left: 2px solid #444; padding-left: 1rem; }
+    .question { color: #aaa; font-size: 0.9rem; margin-bottom: 5px; font-family: 'Space Mono'; }
+    .answer { color: #fff; font-size: 1.1rem; }
+
+    /* FOOTER */
+    footer { text-align: center; padding: 3rem; color: #555; font-size: 0.9rem; border-top: 1px solid #222; margin-top: 3rem; }
+    .pdf-btn {
+        display: inline-block; background: var(--accent-blue); color: #000; padding: 10px 20px;
+        text-decoration: none; font-weight: bold; font-family: 'Space Mono'; margin-top: 2rem;
+        border: 2px solid #fff;
+    }
+    .pdf-btn:hover { background: #fff; color: var(--accent-blue); }
+
+  </style>
+</head>
+<body>
+
+<div class="crt-overlay"></div>
+
+<nav class="zsnes-bar">
+    <a href="../parcial1.html" class="nav-link"><< RETURN TO INDEX</a>
+    <span style="margin-left:auto; color:#aaa; font-family:'Space Mono'">FILE: ACT03_IPTABLES.HTML</span>
+</nav>
+
+<main>
+
+  <header class="report-header">
+    <span class="meta-tag">03 FEB 2026</span>
+    <span class="meta-tag">CNO V</span>
+    <span class="meta-tag">177876</span>
+    <h1>INTERPRETACIÓN DE POLÍTICAS DE FILTRADO (IPTABLES)</h1>
+    <p style="font-size: 1.2rem; color: #fff; margin-top: 1rem;">ANÁLISIS DE FLUJO DE PAQUETES Y TRADUCCIÓN DE REGLAS</p>
+  </header>
+
+  <article class="window-frame">
+    <div class="window-bar">
+      <span>/ETC/NET/PACKET_FLOW.LOG</span>
+      <div class="window-controls"><span></span><span></span></div>
+    </div>
+    <div class="window-content">
+      <h2>1. Flujo del Paquete</h2>
+      <div class="qa-box">
+        <div class="question">Cuando un paquete llega al sistema...</div>
+        <div class="answer">
+            1. Pasa por una <span style="color:var(--accent-green)">Table</span> (Tabla)<br>
+            2. Después por una <span style="color:var(--accent-green)">Chain</span> (Cadena)<br>
+            3. Finalmente se ejecuta una <span style="color:var(--accent-green)">Rule/Action</span> (Regla/Acción)
+        </div>
+      </div>
+
+      <h2>2. Propósito de las Tablas</h2>
+      <table class="tech-table">
+        <tr>
+            <th>TABLA</th>
+            <th>PROPÓSITO PRINCIPAL</th>
+            <th>EJEMPLO DE USO</th>
+        </tr>
+        <tr>
+            <td style="color:var(--accent-blue); font-weight:bold;">FILTER</td>
+            <td>Permite filtrar paquetes</td>
+            <td>Bloqueo de tráfico</td>
+        </tr>
+        <tr>
+            <td style="color:var(--accent-blue); font-weight:bold;">NAT</td>
+            <td>Traducción de direcciones</td>
+            <td>Port Forwarding</td>
+        </tr>
+        <tr>
+            <td style="color:var(--accent-blue); font-weight:bold;">MANGLE</td>
+            <td>Auditoría de Paquetes</td>
+            <td>Denegar Ataques</td>
+        </tr>
+        <tr>
+            <td style="color:var(--accent-blue); font-weight:bold;">RAW</td>
+            <td>Seguimiento de Paquetes</td>
+            <td>Trackear paquetes</td>
+        </tr>
+        <tr>
+            <td style="color:var(--accent-blue); font-weight:bold;">SECURITY</td>
+            <td>Analizar Propósito/Servicio</td>
+            <td>Autorizar Servicios</td>
+        </tr>
+      </table>
+    </div>
+  </article>
+
+  <article class="window-frame">
+    <div class="window-bar">
+      <span>/BIN/CMD_TRANSLATOR.SH</span>
+      <div class="window-controls"><span></span><span></span></div>
+    </div>
+    <div class="window-content">
+      <h2>3. Anatomía de un Comando</h2>
+      <div class="code-block">
+iptables -A <span class="param">INPUT</span> -p tcp -m <span class="param">multiport</span> --dports 80,443 -j <span class="param">ACCEPT</span>
+      </div>
+
+      <div class="qa-box">
+        <div class="question">4. Este comando permite:</div>
+        <div class="answer">Permite las conexiones HTTP / HTTPS.</div>
+      </div>
+
+      <div class="qa-box">
+        <div class="question">5. Variables y Opciones Comunes:</div>
+        <ul style="list-style:none; padding:0; margin-top:10px;">
+            <li style="margin-bottom:8px;">
+                <span class="question">a) Limitar intentos por minuto:</span><br>
+                <span class="code-block" style="padding:5px; display:inline-block; margin:0;">--limit 5/minute</span>
+            </li>
+            <li style="margin-bottom:8px;">
+                <span class="question">b) Filtrar por IP de origen:</span><br>
+                <span class="code-block" style="padding:5px; display:inline-block; margin:0;">-s 192.168.1.0/24</span>
+            </li>
+            <li style="margin-bottom:8px;">
+                <span class="question">c) Ver solo números, sin DNS:</span><br>
+                <span class="code-block" style="padding:5px; display:inline-block; margin:0;">--list -n</span>
+            </li>
+            <li style="margin-bottom:8px;">
+                <span class="question">d) Ver reglas con contadores (paquetes y bytes):</span><br>
+                <span class="code-block" style="padding:5px; display:inline-block; margin:0;">iptables -L -v -n --line-numbers</span>
+            </li>
+        </ul>
+      </div>
+
+      <div class="qa-box">
+        <div class="question">6. ¿Qué hace esta regla compleja?</div>
+        <div class="code-block">iptables -A INPUT -i eth0 -p tcp -m multiport --dports 22,80,443 \
+-m state --state NEW,ESTABLISHED -j ACCEPT</div>
+        <div class="answer" style="margin-top:10px;">
+            Permite el tráfico TCP de los puertos 22, 80 y 443 en la interfaz eth0, revisando el estado de conexión (NUEVA o ESTABLECIDA).
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <article class="window-frame">
+    <div class="window-bar">
+      <span>/SBIN/FIREWALL_RULES.CONF</span>
+      <div class="window-controls"><span></span><span></span></div>
+    </div>
+    <div class="window-content">
+      <h2>Ejercicios de Escritura de Reglas</h2>
+
+      <div class="qa-box">
+        <div class="question">7. Permitir tráfico HTTP entrante:</div>
+        <div class="code-block">iptables -A INPUT -p tcp --dport 80 -j ACCEPT</div>
+      </div>
+
+      <div class="qa-box">
+        <div class="question">8. Permitir todo el tráfico saliente:</div>
+        <div class="code-block">iptables -A OUTPUT -o wlan0 -j ACCEPT</div>
+      </div>
+
+      <div class="qa-box">
+        <div class="question">9. Permitir SSH solo desde la IP 192.168.1.50:</div>
+        <div class="code-block">iptables -A INPUT -p tcp -s 192.168.1.50 --dport 22 -j ACCEPT</div>
+      </div>
+
+      <div class="qa-box">
+        <div class="question">10. Permitir tráfico TCP entrante a puertos 80 y 443 solo si es conexión establecida o relacionada:</div>
+        <div class="code-block">iptables -A INPUT -p tcp -m multiport --dports 80,443 -m state --state ESTABLISHED,RELATED -j ACCEPT</div>
+      </div>
+
+      <div class="qa-box">
+        <div class="question">11. Permitir tráfico TCP entrante por eth0 a 22, 80 y 443, registrar intentos y permitir solo NEW y ESTABLISHED:</div>
+        <div class="code-block">
+iptables -A INPUT -i eth0 -p tcp -m multiport \
+--log-prefix "intentos" --dports 22,80,443 \
+-m state --state NEW,ESTABLISHED -j ACCEPT
+        </div>
+      </div>
+
+      <div style="text-align:center;">
+        <a href="../assets/177876-act30001.jpg" target="_blank" class="pdf-btn">[ VER ESCANEO ORIGINAL PG 1 ]</a>
+        <a href="../assets/177876-act30002.jpg" target="_blank" class="pdf-btn">[ VER ESCANEO ORIGINAL PG 2 ]</a>
+      </div>
+
+    </div>
+  </article>
+
+  <footer>
+    <p>© 2026 BRUNO LUNA | UPSLP - SEGURIDAD INFORMÁTICA</p>
+  </footer>
+
+</main>
+
+</body>
+</html>
