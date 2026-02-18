@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SYSTEM :: BRUNO LUNA</title>
+  <meta name="description" content="Portafolio Académico de Seguridad Informática - CNO V" />
+  
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-void: #050508;
+      --zsnes-top: #5a6885;
+      --zsnes-bottom: #212536;
+      --metal-light: #8a9bb8;
+      --metal-dark: #12141d;
+      --text-main: #d1d5db;
+      --text-dim: #6b7280;
+      --accent-cold: #8ab4f8; 
+      --accent-alert: #cd5c5c; 
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-void);
+      color: var(--text-main);
+      font-family: 'VT323', monospace;
+      font-size: 21px;
+      line-height: 1.5;
+      padding-top: 50px;
+      overflow-x: hidden;
+    }
+
+    .crt-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%, 
+        rgba(0, 0, 0, 0.1) 50%
+      );
+      background-size: 100% 4px;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    .zsnes-bar {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 40px;
+      background: linear-gradient(180deg, var(--zsnes-top) 0%, var(--zsnes-bottom) 100%);
+      border-bottom: 2px solid var(--metal-dark);
+      display: flex;
+      align-items: center;
+      padding: 0 1rem;
+      z-index: 1000;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+      user-select: none;
+    }
+
+    .zsnes-menu { display: flex; list-style: none; }
+
+    .zsnes-item {
+      position: relative;
+      margin-right: 1.5rem;
+      cursor: pointer;
+      color: #fff;
+      padding: 5px 10px;
+      transition: color 0.2s;
+      font-weight: bold;
+    }
+
+    .zsnes-item:hover {
+      background: rgba(255,255,255,0.15);
+      color: var(--accent-cold);
+    }
+
+    .dropdown {
+      position: absolute;
+      top: 100%; left: 0;
+      background: var(--zsnes-bottom);
+      border: 1px solid var(--metal-light);
+      min-width: 180px;
+      display: none;
+      box-shadow: 4px 4px 0px rgba(0,0,0,0.5);
+    }
+
+    .zsnes-item:hover .dropdown { display: block; }
+
+    .dropdown div, .dropdown a {
+      display: block;
+      padding: 8px 12px;
+      color: var(--text-main);
+      text-decoration: none;
+      border-bottom: 1px solid #333;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .dropdown div:hover, .dropdown a:hover {
+      background: var(--accent-cold);
+      color: var(--bg-void);
+    }
+
+    main { max-width: 850px; margin: 3rem auto; padding: 0 1rem; }
+
+    .profile-header {
+      text-align: center;
+      margin-bottom: 3.5rem;
+      border-bottom: 2px dashed var(--text-dim);
+      padding-bottom: 2rem;
+    }
+    
+    .glitch-title {
+      font-size: 3.5rem;
+      color: var(--accent-cold);
+      text-shadow: 3px 3px 0px var(--zsnes-bottom);
+      margin-bottom: 0.5rem;
+      line-height: 1;
+    }
+
+    .institution-tag {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--bg-void);
+      background: var(--metal-light);
+      padding: 2px 6px;
+      margin-right: 5px;
+      font-weight: bold;
+    }
+
+    .subtitle {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+    }
+
+    .window-frame {
+      background: #0c0c12;
+      border: 2px solid var(--text-dim);
+      margin-bottom: 3rem;
+      /* Efecto Biselado */
+      border-top-color: var(--metal-light);
+      border-left-color: var(--metal-light);
+      border-right-color: var(--metal-dark);
+      border-bottom-color: var(--metal-dark);
+    }
+
+    .window-bar {
+      background: linear-gradient(90deg, var(--zsnes-bottom), #000);
+      padding: 4px 10px;
+      border-bottom: 2px solid var(--text-dim);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--accent-cold);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .window-controls span {
+      display: inline-block; width: 10px; height: 10px;
+      border: 1px solid var(--text-dim); background: #000; margin-left: 3px;
+    }
+
+    .window-content { padding: 1.5rem; }
+
+    h2 { font-size: 1.2rem; color: var(--accent-cold); margin-bottom: 0.5rem; }
+
+    input, textarea, button {
+      width: 100%;
+      background: #000;
+      border: 1px solid var(--text-dim);
+      color: var(--text-main);
+      font-family: 'Space Mono', monospace;
+      padding: 12px;
+      margin-bottom: 15px;
+      outline: none;
+      font-size: 0.9rem;
+    }
+    
+    input:focus, textarea:focus {
+      border-color: var(--accent-cold);
+      background: #080810;
+    }
+
+    button {
+      background: var(--zsnes-bottom);
+      color: white;
+      text-transform: uppercase;
+      cursor: pointer;
+      font-weight: bold;
+      border: 2px outset var(--metal-light);
+    }
+
+    button:active {
+      border: 2px inset var(--metal-dark);
+      transform: translateY(1px);
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      background: #020202;
+      border-top: 1px solid #222;
+      margin-top: 4rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="crt-overlay"></div>
+
+<nav class="zsnes-bar">
+  <ul class="zsnes-menu">
+    <li class="zsnes-item">GAME
+      <div class="dropdown">
+        <div onclick="window.scrollTo(0,0)">LOAD STATE (Inicio)</div>
+        <div onclick="saveState()">SAVE STATE (Guardar Pos)</div>
+        <div onclick="loadSavedState()">LOAD SAVED (Cargar Pos)</div>
+        <div onclick="location.reload()">RESET SYSTEM</div>
+        <div onclick="window.location.href='https://youtu.be/WJ16G-8t0MA'" style="color:var(--accent-alert)">EXIT (Salida)</div>
+      </div>
+    </li>
+    <li class="zsnes-item">CONFIG
+      <div class="dropdown">
+        <a href="parcial1.html">SLOT 1: PARCIAL 1</a>
+        <a href="#">SLOT 2: PARCIAL 2</a>
+        <a href="#">SLOT 3: PARCIAL 3</a>
+        <a href="#">FINAL BOSS: PROYECTO</a>
+      </div>
+    </li>
+  </ul>
+  <div style="margin-left: auto; font-size: 0.75rem; color: #aaa; font-family:'Space Mono'">
+    <span style="color:#0f0">●</span> ONLINE | SSL: SECURE
+  </div>
+</nav>
+
+<main>
+  <header class="profile-header">
+    <h1 class="glitch-title">BRUNO LUNA</h1>
+    <div style="margin-bottom: 1rem;">
+      <span class="institution-tag">UPSLP</span>
+      <span class="institution-tag">2026</span>
+      <span class="institution-tag">CNO V</span>
+    </div>
+    <p class="subtitle">Alias: Paclonk D. MEI | Portafolio de Seguridad Informática</p>
+  </header>
+
+  <article class="window-frame">
+    <div class="window-bar">
+      <span>/ROOT/README.TXT</span>
+      <div class="window-controls"><span></span><span></span></div>
+    </div>
+    <div class="window-content">
+      <h2>Propósito del Sistema</h2>
+      <p>
+        Este portafolio digital actúa como contenedor oficial de las evidencias académicas para la asignatura de 
+        <strong>Seguridad Informática</strong>. El objetivo es documentar el análisis de vulnerabilidades, 
+        pruebas de penetración (PenTesting) y metodologías de defensa activa. 
+        <br><br>
+        Funciona como un respaldo técnico y académico que certifica el desarrollo de competencias en ciberseguridad 
+        ofensiva y defensiva durante el periodo.
+      </p>
+    </div>
+  </article>
+
+  <article class="window-frame">
+    <div class="window-bar">
+      <span>/HOME/USER/PROFILE.DAT</span>
+      <div class="window-controls"><span></span><span></span></div>
+    </div>
+    <div class="window-content">
+      <h2>Perfil Técnico</h2>
+      <p>
+        Estudiante con enfoque en el desarrollo seguro y arquitectura de sistemas. Mi interés principal radica 
+        en entender cómo romper sistemas para aprender a protegerlos (Red Teaming).
+      </p>
+      <br>
+      <p style="font-family:'Space Mono'; font-size:0.9rem; color:var(--text-dim)">
+        [ INTERESES DETECTADOS ]<br>
+        > Seguridad de Aplicaciones Web<br>
+        > Criptografía aplicada<br>
+        > Hardening de Servidores Linux<br>
+        > Investigación de Exploits
+      </p>
+    </div>
+  </article>
+
+  <article class="window-frame">
+    <div class="window-bar">
+      <span>/SYS/CONFIG/SPECS.LOG</span>
+      <div class="window-controls"><span></span><span></span></div>
+    </div>
+    <div class="window-content">
+      <h2>Stack Tecnológico</h2>
+      <ul style="list-style: none; font-family:'Space Mono'; font-size:0.9rem;">
+        <li style="margin-bottom:5px;"><strong>$ LENGUAJES:</strong> C++, Python, JavaScript (ES6), Bash Scripting.</li>
+        <li style="margin-bottom:5px;"><strong>$ PLATAFORMA:</strong> GitHub Pages (Hosting Estático).</li>
+        <li style="margin-bottom:5px;"><strong>$ VERSIONADO:</strong> Git (Control de cambios distribuidos).</li>
+        <li style="margin-bottom:5px;"><strong>$ SEGURIDAD:</strong> Protocolo HTTPS habilitado por defecto.</li>
+      </ul>
+    </div>
+  </article>
+
+  <article class="window-frame">
+    <div class="window-bar">
+      <span>/NET/MAIL/SEND_PACKET</span>
+      <div class="window-controls"><span></span><span></span></div>
+    </div>
+    <div class="window-content">
+      <h2>Establecer Conexión</h2>
+      <form action="https://formspree.io/f/xdazjvlw" method="POST">
+        <label style="font-family:'Space Mono'; font-size: 0.8rem; color: var(--text-dim);">INPUT NAME:</label>
+        <input type="text" name="name" placeholder="Nombre del remitente" required autocomplete="off" />
+        
+        <label style="font-family:'Space Mono'; font-size: 0.8rem; color: var(--text-dim);">INPUT EMAIL:</label>
+        <input type="email" name="email" placeholder="correo@ejemplo.com" required autocomplete="off" />
+        
+        <label style="font-family:'Space Mono'; font-size: 0.8rem; color: var(--text-dim);">DATA PAYLOAD:</label>
+        <textarea name="message" rows="4" placeholder="Escriba su mensaje aquí..." required></textarea>
+        
+        <button type="submit">TRANSMIT DATA</button>
+      </form>
+      <p style="font-size:0.8rem; text-align:center; color:#444;">
+        * Respuesta automática habilitada vía Formspree daemon.
+      </p>
+    </div>
+  </article>
+
+</main>
+
+<footer>
+  <p>© 2026 BRUNO LUNA | UPSLP - SEGURIDAD INFORMÁTICA</p>
+  <p>PF01 STATUS: COMPLETE | RENDERED IN HTML5</p>
+</footer>
+
+<script>
+  function saveState() {
+    const scrollPos = window.scrollY;
+    localStorage.setItem('zsnes_scroll_pos', scrollPos);
+    alert('STATE SAVED: Posición ' + scrollPos + ' guardada en memoria.');
+  }
+
+  function loadSavedState() {
+    const savedPos = localStorage.getItem('zsnes_scroll_pos');
+    if (savedPos) {
+      window.scrollTo({
+        top: parseInt(savedPos),
+        behavior: 'smooth'
+      });
+      console.log('Loading state: ' + savedPos);
+    } else {
+      alert('NO SAVED STATE FOUND.');
+    }
+  }
+
+  window.addEventListener('load', () => {
+    console.log('ZSNES System Initialized...');
+  });
+</script>
+
+</body>
+</html>
