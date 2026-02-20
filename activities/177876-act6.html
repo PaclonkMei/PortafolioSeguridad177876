@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ACT-06 :: OPERATION BAYONET</title>
+  <title>ACT-06 :: IPSEC VPN</title>
   
   <link rel="icon" type="image/png" href="../assets/favicon.png">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=VT323&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
@@ -19,9 +20,9 @@
       --metal-dark: #12141d;
       --text-main: #d1d5db;
       --text-dim: #9ca3af;
-      --accent-red: #ef4444;    /* Alerta / Criminal */
-      --accent-gold: #facc15;   /* Evidencia */
-      --accent-blue: #8ab4f8;   /* Info General */
+      --accent-blue: #8ab4f8; 
+      --accent-green: #4ade80;
+      --accent-cyan: #22d3ee;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -30,7 +31,7 @@
       background-color: var(--bg-void);
       color: var(--text-main);
       font-family: 'VT323', monospace;
-      font-size: 21px;
+      font-size: 20px;
       line-height: 1.6;
       padding-top: 60px;
       overflow-x: hidden;
@@ -57,7 +58,7 @@
       color: #fff; text-decoration: none; margin-right: 20px; font-weight: bold;
       text-transform: uppercase; letter-spacing: 1px;
     }
-    .nav-link:hover { color: var(--accent-red); }
+    .nav-link:hover { color: var(--accent-cyan); }
 
     /* LAYOUT */
     main { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
@@ -65,12 +66,8 @@
     .report-header {
       text-align: center; border-bottom: 2px dashed #444; padding-bottom: 2rem; margin-bottom: 3rem;
     }
-    .report-header h1 { font-size: 3rem; color: var(--accent-red); margin: 0; text-shadow: 4px 4px 0 #000; }
-    .stamp { 
-        border: 2px solid var(--accent-red); color: var(--accent-red); padding: 5px 15px; 
-        font-family: 'Space Mono'; font-weight: bold; display: inline-block; transform: rotate(-5deg);
-        margin-bottom: 1rem; font-size: 1.2rem;
-    }
+    .report-header h1 { font-size: 3rem; color: var(--accent-cyan); margin: 0; text-shadow: 4px 4px 0 #000; }
+    .meta-tag { background: #222; padding: 2px 8px; font-family: 'Space Mono'; font-size: 0.8rem; color: #aaa; border: 1px solid #444; margin: 0 5px; }
 
     /* WINDOW FRAMES */
     .window-frame {
@@ -81,42 +78,37 @@
     .window-bar {
       background: linear-gradient(90deg, var(--zsnes-bottom), #000); padding: 5px 15px;
       border-bottom: 2px solid #333; display: flex; justify-content: space-between; align-items: center;
-      font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--accent-red); letter-spacing: 1px;
+      font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--accent-cyan); letter-spacing: 1px;
     }
     .window-content { padding: 2rem; }
 
-    /* EVIDENCE LISTS */
-    .evidence-list { list-style: none; padding: 0; }
-    .evidence-item { 
-        margin-bottom: 1.5rem; border-left: 3px solid #333; padding-left: 1rem; 
-        transition: border-color 0.3s;
-    }
-    .evidence-item:hover { border-left-color: var(--accent-red); }
-    
-    .question { 
-        color: #888; font-family: 'Space Mono'; font-size: 0.85rem; text-transform: uppercase; margin-bottom: 5px; 
-    }
-    .answer { color: #fff; font-size: 1.1rem; }
-    .highlight { color: var(--accent-red); font-weight: bold; }
+    /* ELEMENTS */
+    h2 { color: var(--accent-cyan); border-bottom: 1px solid #333; padding-bottom: 5px; margin: 0 0 1rem 0; font-size: 1.4rem; text-transform: uppercase; }
+    p { margin-bottom: 1rem; text-align: justify; color: var(--text-dim); }
 
-    /* MUGSHOT / PROFILE PLACEHOLDER */
-    .profile-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; margin-bottom: 2rem; }
-    .mugshot {
-        background: #111; border: 1px solid #444; display: flex; align-items: center; justify-content: center;
-        height: 200px; color: #333; font-family: 'Space Mono'; text-align: center;
+    /* CISCO CLI CODE BLOCKS */
+    .code-block {
+        background: #000; border: 1px solid #333; padding: 1.5rem; margin: 1rem 0;
+        font-family: 'Space Mono', monospace; font-size: 0.85rem; color: #d1d5db;
+        overflow-x: auto; position: relative;
     }
+    .code-block::before {
+        content: "Cisco IOS CLI"; position: absolute; top: 0; right: 0; 
+        background: #222; color: #888; padding: 2px 6px; font-size: 0.7rem;
+    }
+    .prompt { color: var(--accent-green); font-weight: bold; }
+    .cmd { color: #fff; }
+    .output { color: #888; }
+    .highlight { color: var(--accent-cyan); font-weight: bold; }
 
     /* FOOTER */
     footer { text-align: center; padding: 3rem; color: #555; font-size: 0.9rem; border-top: 1px solid #222; margin-top: 3rem; }
     .pdf-btn {
-        display: inline-block; background: var(--accent-red); color: #000; padding: 10px 20px;
+        display: inline-block; background: var(--accent-cyan); color: #000; padding: 10px 20px;
         text-decoration: none; font-weight: bold; font-family: 'Space Mono'; margin-top: 2rem;
         border: 2px solid #fff;
     }
-    .pdf-btn:hover { background: #fff; color: var(--accent-red); }
-
-    /* RESPONSIVE */
-    @media (max-width: 600px) { .profile-grid { grid-template-columns: 1fr; } }
+    .pdf-btn:hover { background: #fff; color: var(--accent-cyan); }
 
   </style>
 </head>
@@ -126,121 +118,165 @@
 
 <nav class="zsnes-bar">
     <a href="../parcial1.html" class="nav-link"><< RETURN TO INDEX</a>
-    <span style="margin-left:auto; color:#aaa; font-family:'Space Mono'">FILE: ACT06_OXYMONSTER.HTML</span>
+    <span style="margin-left:auto; color:#aaa; font-family:'Space Mono'">FILE: ACT06_IPSEC_VPN.HTML</span>
 </nav>
 
 <main>
 
   <header class="report-header">
-    <div class="stamp">CASE CLOSED</div>
-    <h1>OPERATION BAYONET</h1>
-    <p style="font-size: 1.2rem; color: #fff; margin-top: 1rem;">TARGET: OXYMONSTER (DREAM MARKET ADMIN)</p>
+    <span class="meta-tag">16 FEB 2026</span>
+    <span class="meta-tag">CNO V</span>
+    <span class="meta-tag">177876</span>
+    <h1>IMPLEMENTACIÓN IPSEC VPN</h1>
+    <p style="font-size: 1.2rem; color: #fff; margin-top: 1rem;">CONFIGURACIÓN DE TÚNELES SEGUROS EN CISCO PACKET TRACER</p>
   </header>
 
   <article class="window-frame">
     <div class="window-bar">
-      <span>/INTEL/TARGET_PROFILE.DAT</span>
+      <span>/DOCS/01_INTRO.TXT</span>
       <div class="window-controls"><span></span><span></span></div>
     </div>
     <div class="window-content">
-      <div class="profile-grid">
-        <div class="mugshot">
-            [ IMG_404 ]<br>GAL VALLERIUS
-        </div>
-        <div>
-            <ul class="evidence-list">
-                <li class="evidence-item">
-                    <div class="question">11. Identidad Real</div>
-                    <div class="answer"><span class="highlight">Gal Vallerius</span></div>
-                </li>
-                <li class="evidence-item">
-                    <div class="question">Alias en Dark Web</div>
-                    <div class="answer">OxyMonster</div>
-                </li>
-                <li class="evidence-item">
-                    <div class="question">8. Inicio de Actividades</div>
-                    <div class="answer">Mayo 2015</div>
-                </li>
-                <li class="evidence-item">
-                    <div class="question">9. Ascenso al Poder</div>
-                    <div class="answer">Tardó solo <strong>7 meses</strong> en obtener el rol de Administrador/Moderador Senior.</div>
-                </li>
-            </ul>
-        </div>
+      <h2>Introducción</h2>
+      <p>
+        La protección de datos en redes públicas suele ser complicada debido al libre acceso, lo que permite que los datos puedan ser modificados o suplantados en tránsito. Para mitigar esto, se utiliza <strong>IPSec (Internet Protocol Security)</strong>, un conjunto de protocolos de la capa de red que establece canales seguros mediante mecanismos criptográficos de autenticación, integridad y confidencialidad.
+      </p>
+      <p>
+        En esta práctica se implementa una VPN IPSec en Packet Tracer. El objetivo es establecer una comunicación segura entre dos redes LAN (R1 y R3) a través de un ISP simulado, asegurando que el tráfico esté cifrado antes de atravesar la red pública.
+      </p>
+      
+      <div style="text-align: center; margin: 2rem 0;">
+        <p style="font-family:'Space Mono'; color:var(--accent-cyan); margin-bottom:10px;">[ TOPOLOGÍA DE RED ]</p>
+              </div>
+    </div>
+  </article>
+
+  <article class="window-frame">
+    <div class="window-bar">
+      <span>/BIN/BASIC_CONFIG.SH</span>
+      <div class="window-controls"><span></span><span></span></div>
+    </div>
+    <div class="window-content">
+      <h2>Desarrollo: Enrutamiento Base</h2>
+      <p>Se configuraron las IPs y el enrutamiento estático para establecer conexión de extremo a extremo antes de aplicar seguridad.</p>
+
+      <div class="code-block">
+<span class="output">! --- Configuración Router 1 (R1) ---</span>
+<span class="prompt">R1(config)#</span> <span class="cmd">int G0/0</span>
+<span class="prompt">R1(config-if)#</span> <span class="cmd">ip add 209.165.100.1 255.255.255.252</span>
+<span class="prompt">R1(config-if)#</span> <span class="cmd">no shutdown</span>
+<span class="prompt">R1(config-if)#</span> <span class="cmd">int G0/1</span>
+<span class="prompt">R1(config-if)#</span> <span class="cmd">ip add 192.168.1.1 255.255.255.0</span>
+<span class="prompt">R1(config-if)#</span> <span class="cmd">no shutdown</span>
+<span class="prompt">R1(config-if)#</span> <span class="cmd">exit</span>
+<span class="prompt">R1(config)#</span> <span class="cmd">ip route 0.0.0.0 0.0.0.0 209.165.100.2</span>
+
+<span class="output">! --- Configuración ISP ---</span>
+<span class="prompt">ISP(config)#</span> <span class="cmd">int g0/0</span>
+<span class="prompt">ISP(config-if)#</span> <span class="cmd">ip add 209.165.100.2 255.255.255.252</span>
+<span class="prompt">ISP(config-if)#</span> <span class="cmd">no shutdown</span>
+<span class="prompt">ISP(config-if)#</span> <span class="cmd">int g0/1</span>
+<span class="prompt">ISP(config-if)#</span> <span class="cmd">ip add 209.165.200.2 255.255.255.252</span>
+<span class="prompt">ISP(config-if)#</span> <span class="cmd">no shutdown</span>
+<span class="prompt">ISP(config-if)#</span> <span class="cmd">exit</span>
+<span class="prompt">ISP(config)#</span> <span class="cmd">ip route 192.168.1.0 255.255.255.0 209.165.100.1</span>
+<span class="prompt">ISP(config)#</span> <span class="cmd">ip route 192.168.3.0 255.255.255.0 209.165.200.1</span>
+
+<span class="output">! --- Configuración Router 3 (R3) ---</span>
+<span class="prompt">R3(config)#</span> <span class="cmd">int G0/0</span>
+<span class="prompt">R3(config-if)#</span> <span class="cmd">ip add 209.165.200.1 255.255.255.252</span>
+<span class="prompt">R3(config-if)#</span> <span class="cmd">no shutdown</span>
+<span class="prompt">R3(config-if)#</span> <span class="cmd">int G0/1</span>
+<span class="prompt">R3(config-if)#</span> <span class="cmd">ip add 192.168.3.1 255.255.255.0</span>
+<span class="prompt">R3(config-if)#</span> <span class="cmd">no shutdown</span>
+<span class="prompt">R3(config-if)#</span> <span class="cmd">exit</span>
+<span class="prompt">R3(config)#</span> <span class="cmd">ip route 0.0.0.0 0.0.0.0 209.165.200.2</span>
       </div>
     </div>
   </article>
 
   <article class="window-frame">
     <div class="window-bar">
-      <span>/LOGS/OPERATION_DETAILS.LOG</span>
+      <span>/BIN/IPSEC_DEPLOY.SH</span>
       <div class="window-controls"><span></span><span></span></div>
     </div>
     <div class="window-content">
-      <h2>Detalles de la Investigación</h2>
+      <h2>Implementación de Túnel IPSec</h2>
       
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-        
-        <div>
-            <div class="question">1. Agencias Involucradas</div>
-            <div class="answer" style="margin-bottom: 1.5rem;">DEA (Drug Enforcement Administration) y FBI.</div>
+      <p><strong>1. Habilitar Licencia de Seguridad y Tráfico Interesante</strong><br>
+      Fue necesario habilitar el módulo `securityk9` para permitir cifrado. Luego, se definió mediante ACL 100 qué tráfico debe ser protegido por la VPN.</p>
+      
+      <div class="code-block">
+<span class="prompt">R1(config)#</span> <span class="cmd">license boot module c1900 technology-package securityk9</span>
+<span class="prompt">R1(config)#</span> <span class="cmd">access-list 100 permit ip 192.168.1.0 0.0.0.255 192.168.3.0 0.0.0.255</span>
 
-            <div class="question">2. Nombre de la Operación</div>
-            <div class="answer" style="margin-bottom: 1.5rem;">Operación <span class="highlight">Bayoneta</span> (Operation Bayonet).</div>
+<span class="output">! En R3 se invierte el origen y destino:</span>
+<span class="prompt">R3(config)#</span> <span class="cmd">access-list 100 permit ip 192.168.3.0 0.0.0.255 192.168.1.0 0.0.0.255</span>
+      </div>
 
-            <div class="question">3. Mercado Objetivo</div>
-            <div class="answer" style="margin-bottom: 1.5rem;">Dream Market (Mercado de venta de drogas y bienes ilícitos).</div>
-            
-            <div class="question">5. Principal Producto</div>
-            <div class="answer">Fentanilo y Opioides.</div>
-        </div>
+      <p><strong>2. Fase 1 - ISAKMP (Negociación)</strong><br>
+      Establecimiento del canal seguro intercambiando parámetros de cifrado (AES-256) y la llave precompartida (PSK: <em>santrum</em>).</p>
 
-        <div>
-            <div class="question">4. Sistema de Reputación</div>
-            <div class="answer" style="margin-bottom: 1.5rem;">Basado en <strong>reseñas internas</strong> de usuarios dentro del sitio (Similar a e-commerce legal).</div>
+      <div class="code-block">
+<span class="prompt">R1(config)#</span> <span class="cmd">crypto isakmp policy 10</span>
+<span class="prompt">R1(config-isakmp)#</span> <span class="cmd">encryption aes 256</span>
+<span class="prompt">R1(config-isakmp)#</span> <span class="cmd">authentication pre-share</span>
+<span class="prompt">R1(config-isakmp)#</span> <span class="cmd">group 5</span>
+<span class="prompt">R1(config-isakmp)#</span> <span class="cmd">exit</span>
+<span class="prompt">R1(config)#</span> <span class="cmd">crypto isakmp key santrum address 209.165.200.1</span>
+      </div>
 
-            <div class="question">6. Sistema "Escrow"</div>
-            <div class="answer" style="margin-bottom: 1.5rem;">Mecanismo de garantía donde el dinero se queda en un <strong>depósito intermedio</strong> hasta que el comprador confirma la recepción del producto.</div>
+      <p><strong>3. Fase 2 y 3 - Transform Set & Crypto Map</strong><br>
+      El <em>Transform Set</em> define cómo se protegerán los datos (ESP-AES). El <em>Crypto Map</em> vincula el peer remoto, los algoritmos y la ACL.</p>
 
-            <div class="question">7. Proceso "The Mixer" (Tumbler)</div>
-            <div class="answer">Servicio para <strong>anonimizar bitcoins</strong> mezclándolos con fondos de otras fuentes para borrar el rastro de la actividad ilícita.</div>
-        </div>
+      <div class="code-block">
+<span class="output">! Transform Set</span>
+<span class="prompt">R1(config)#</span> <span class="cmd">crypto ipsec transform-set R1->R3 esp-aes 256 esp-sha-hmac</span>
 
+<span class="output">! Crypto Map</span>
+<span class="prompt">R1(config)#</span> <span class="cmd">crypto map IPSEC-MAP 10 ipsec-isakmp</span>
+<span class="prompt">R1(config-crypto-map)#</span> <span class="cmd">set peer 209.165.200.1</span>
+<span class="prompt">R1(config-crypto-map)#</span> <span class="cmd">set transform-set R1->R3</span>
+<span class="prompt">R1(config-crypto-map)#</span> <span class="cmd">set pfs group5</span>
+<span class="prompt">R1(config-crypto-map)#</span> <span class="cmd">set security-association lifetime seconds 86400</span>
+<span class="prompt">R1(config-crypto-map)#</span> <span class="cmd">match address 100</span>
+<span class="prompt">R1(config-crypto-map)#</span> <span class="cmd">exit</span>
+
+<span class="output">! Fase 4: Aplicar a la interfaz WAN (G0/0)</span>
+<span class="prompt">R1(config)#</span> <span class="cmd">int g0/0</span>
+<span class="prompt">R1(config-if)#</span> <span class="cmd">crypto map IPSEC-MAP</span>
+<span class="output">*Jan 3 07:16:26.785: %CRYPTO-6-ISAKMP_ON_OFF: ISAKMP is ON</span>
       </div>
     </div>
   </article>
 
   <article class="window-frame">
     <div class="window-bar">
-      <span>/EVIDENCE/ARREST_WARRANT.TXT</span>
+      <span>/LOGS/PING_TEST.LOG</span>
       <div class="window-controls"><span></span><span></span></div>
     </div>
     <div class="window-content">
-      <h2 style="color:var(--accent-red)">Fallas de Seguridad (OPSEC)</h2>
+      <h2>Pruebas y Conclusión</h2>
       
-      <ul class="evidence-list">
-        <li class="evidence-item">
-            <div class="question">10. El Error Crítico</div>
-            <div class="answer">
-                Exceso de confianza. <span class="highlight">No usó un Mixer</span> para ciertas transacciones y transfirió fondos a su cuenta personal en <strong>LocalBitcoins</strong>.
-            </div>
-        </li>
-        <li class="evidence-item">
-            <div class="question">12. Vinculación (Digital)</div>
-            <div class="answer">
-                Análisis de estilometría (forma de escribir). Los agentes compararon sus comentarios en redes sociales (Instagram/Twitter) con los posts de "OxyMonster" en la Dark Web. Además, el rastro de la Blockchain desde Dream Market hasta su cartera en LocalBitcoins confirmó su identidad.
-            </div>
-        </li>
-        <li class="evidence-item">
-            <div class="question">13. La Prueba Definitiva (Física)</div>
-            <div class="answer">
-                Fue arrestado en el aeropuerto de Atlanta al viajar desde Francia para un concurso de barbas y bigotes. Al revisar su <strong>Laptop</strong> en aduanas, encontraron la sesión de Tor abierta y las <strong>claves PGP privadas</strong> de OxyMonster, confirmando su identidad sin dudas.
-            </div>
-        </li>
-      </ul>
+      <div class="code-block" style="border-color: var(--accent-green);">
+<span class="output">C:\></span> <span class="cmd">ping 192.168.3.10</span>
+
+<span class="output">Pinging 192.168.3.10 with 32 bytes of data:
+Reply from 192.168.3.10: bytes=32 time=12ms TTL=126
+Reply from 192.168.3.10: bytes=32 time=12ms TTL=126
+Reply from 192.168.3.10: bytes=32 time=12ms TTL=126
+Reply from 192.168.3.10: bytes=32 time=12ms TTL=126
+
+Ping statistics for 192.168.3.10:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss)</span>
+      </div>
+
+      <p style="margin-top: 2rem;">
+        La implementación de la VPN IPSec permitió conectar ambas redes privadas a través del ISP como si fueran una sola red lógica, garantizando confidencialidad, integridad y autenticación del tráfico. El túnel se construye dinámicamente cuando aparece tráfico interesante, demostrando que la seguridad no solo depende del enrutamiento, sino de mecanismos criptográficos extremo a extremo.
+      </p>
 
       <div style="text-align:center;">
-        <a href="../assets/177876-act6.jpg" target="_blank" class="pdf-btn">[ VER NOTAS ORIGINALES (MANUSCRITO) ]</a>
+        <a href="../assets/177876-act6.pdf" target="_blank" class="pdf-btn">[ DESCARGAR REPORTE TÉCNICO PDF ]</a>
       </div>
 
     </div>
