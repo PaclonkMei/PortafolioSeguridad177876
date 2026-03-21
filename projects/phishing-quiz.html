@@ -82,8 +82,8 @@
 
         <div id="feedback-area" class="feedback-box">
           <strong id="feedback-title"></strong>
-          <p id="feedback-text" style="color: inherit;"></p>
-          <button class="btn" onclick="nextQuestion()" style="margin-top:10px;">SIGUIENTE >></button>
+          <p id="feedback-text" style="color: inherit; margin-top: 10px;"></p>
+          <button class="btn" onclick="nextQuestion()" style="margin-top:15px;">SIGUIENTE >></button>
         </div>
       </div>
     </article>
@@ -116,7 +116,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
   <script>
-    // CONFIGURACIÓN DE FIREBASE
+    // CONFIGURACIÓN DE FIREBASE (TU TOKEN)
     const firebaseConfig = {
       apiKey: "AIzaSyA6BKFoe6bKiwC_7psHidSISqwNU4KnM9U",
       authDomain: "phishing-quiz-upslp.firebaseapp.com",
@@ -137,77 +137,77 @@
       window.location.href = "PR02.html";
     }
 
-    // BASE DE DATOS DE ESCENARIOS
+    // BASE DE DATOS DE ESCENARIOS (TEXTOS NEUTRALES CORREGIDOS)
     const quizData = [
       {
         title: "Alerta de Urgencia (Spear Phishing)",
         sender: "IT Support", domain: "<admin@it-support-update.com>", subject: "URGENTE: Cierre de cuenta inminente",
         body: "Estimado usuario, hemos detectado actividad inusual. Su cuenta será suspendida en 2 horas si no verifica su identidad.<br><br><a href='#' class='fake-btn'>Verificar Cuenta Ahora</a>",
         isPhishing: true,
-        feedback: "¡Bien hecho! El dominio 'it-support-update.com' es un engaño clásico (typosquatting). La urgencia ('en 2 horas') es una táctica psicológica para forzar el clic."
+        explanation: "El dominio 'it-support-update.com' es un engaño clásico (typosquatting). La urgencia ('en 2 horas') es una táctica psicológica para forzar el clic."
       },
       {
         title: "Notificación de Google (Legítimo)",
         sender: "Google Security", domain: "<no-reply@accounts.google.com>", subject: "Nuevo inicio de sesión en Windows",
         body: "Se ha detectado un nuevo inicio de sesión en tu cuenta de Google desde un dispositivo Windows. Si fuiste tú, no tienes que hacer nada.<br><br><a href='#' class='fake-link'>Revisar actividad</a>",
         isPhishing: false,
-        feedback: "Correcto. El dominio del remitente termina exactamente en '@accounts.google.com' y la URL apunta al dominio oficial."
+        explanation: "El dominio del remitente termina exactamente en '@accounts.google.com' y la URL apunta al dominio oficial. Es una notificación real."
       },
       {
         title: "Adjunto Malicioso (Malware)",
         sender: "Recursos Humanos", domain: "<rrhh@tuempresa.com>", subject: "Nueva política de vacaciones 2026",
         body: "Hola equipo, adjunto el nuevo tabulador de vacaciones que entra en vigor de inmediato. Por favor, revisen el documento.<br><br>📎 <b>Politicas_Vacaciones_2026.pdf.exe</b> (1.2 MB)",
         isPhishing: true,
-        feedback: "¡Excelente! La técnica de la doble extensión (.pdf.exe) es muy usada para camuflar malware. Un PDF real no termina en .exe."
+        explanation: "La técnica de la doble extensión (.pdf.exe) es muy usada para camuflar malware. Un PDF real no termina en .exe."
       },
       {
         title: "Bypass de MFA (Ingeniería Social)",
         sender: "Microsoft Authenticator", domain: "<mfa-auth@microsoft-security.net>", subject: "Aprobación de inicio de sesión requerida",
         body: "Hemos bloqueado un intento de inicio de sesión. Para asegurar su cuenta, por favor ingrese el código enviado a su teléfono en el siguiente portal de verificación seguro.<br><br><a href='#' class='fake-btn'>Ingresar Código MFA</a>",
         isPhishing: true,
-        feedback: "Correcto. Los atacantes intentan robar tu token MFA llevándote a sitios falsos. Microsoft nunca usará un dominio '.net' genérico."
+        explanation: "Los atacantes intentan robar tu token MFA llevándote a sitios falsos. Microsoft nunca usará un dominio '.net' genérico para autenticación."
       },
       {
         title: "Factura de Proveedor (Fraude CEO)",
         sender: "Finanzas Paypal", domain: "<service@paypal.com>", subject: "Factura #99320 Pagada",
         body: "Tu pago de $450.00 USD a 'TechCorp' se ha procesado. Si no reconoces esta transacción, cancela el pago desde nuestro portal:<br><br><a href='#' class='fake-link'>Cancelar Transacción</a>",
         isPhishing: true,
-        feedback: "Buen ojo. Aunque el remitente parezca real (Spoofing), el enlace oculta un dominio fraudulento de robo de credenciales."
+        explanation: "Aunque el remitente parezca real (Spoofing), el enlace oculta un dominio fraudulento de robo de credenciales diseñado para atraparte en pánico."
       },
       {
         title: "Invitación de GitHub (Legítimo)",
         sender: "GitHub", domain: "<noreply@github.com>", subject: "[GitHub] You've been invited to the 'CyberSec' organization",
         body: "Hi there! Admin has invited you to join the CyberSec organization on GitHub.<br><br><a href='#' class='fake-btn'>Join Organization</a>",
         isPhishing: false,
-        feedback: "Acertaste. Es una invitación legítima. La infraestructura de envío corresponde oficialmente a GitHub."
+        explanation: "Es una invitación legítima. La infraestructura de envío corresponde oficialmente a GitHub y no solicita contraseñas directamente."
       },
       {
         title: "Almacenamiento Lleno (Homógrafo)",
         sender: "OneDrive Alerts", domain: "<storage-alert@0nedrive.com>", subject: "Tu almacenamiento está al límite (99%)",
         body: "Tu cuenta de OneDrive ha superado el límite de almacenamiento. Actualiza tu plan gratuitamente aquí.<br><br><a href='#' class='fake-link'>Actualizar Plan</a>",
         isPhishing: true,
-        feedback: "¡Exacto! El atacante usó un cero '0' en lugar de la letra 'O' en '0nedrive.com'. Técnica de homógrafo."
+        explanation: "El atacante usó un cero '0' en lugar de la letra 'O' en '0nedrive.com'. Esta técnica de homógrafo visual es muy engañosa."
       },
       {
         title: "Actualización de Slack (Legítimo)",
         sender: "Slack Workspace", domain: "<notification@slack.com>", subject: "New sign-in to your workspace",
         body: "We noticed a new sign-in to your Slack workspace from a new device (Mac OS).<br>If this was you, you can ignore this message.",
         isPhishing: false,
-        feedback: "Correcto. Slack utiliza '@slack.com' para notificaciones reales y no amenaza con borrar cuentas."
+        explanation: "Slack utiliza '@slack.com' para notificaciones reales, es puramente informativa y no te amenaza con borrar cuentas ni exige clics urgentes."
       },
       {
         title: "Oferta de Amazon (Smishing/Scam)",
         sender: "Amazon Promos", domain: "<deals@amazon-rewards-2026.com>", subject: "¡Ganaste una tarjeta de regalo de $1000!",
         body: "Has sido seleccionado al azar para recibir una tarjeta de regalo de $1000. Solo paga $1 de envío confirmando tu tarjeta aquí.<br><br><a href='#' class='fake-btn'>Reclamar Premio</a>",
         isPhishing: true,
-        feedback: "Bien hecho. Los premios inesperados que piden datos de tarjeta son estafas financieras clásicas."
+        explanation: "Los premios inesperados que piden datos de tarjeta para 'liberar envíos' son estafas financieras clásicas. Si es gratis, no debes pagar envío."
       },
       {
         title: "Compartición de Documento (OAuth Phishing)",
         sender: "DocuSign System", domain: "<alerts@docusign.net>", subject: "Documento legal pendiente de firma",
         body: "El departamento legal ha compartido un contrato confidencial contigo. Autoriza a la aplicación 'Legal_Reader' a acceder a tu cuenta de Microsoft 365 para leerlo.<br><br><a href='#' class='fake-link'>Autorizar y Leer</a>",
         isPhishing: true,
-        feedback: "¡Excelente detección! Este es un ataque de Consentimiento OAuth. Pide autorizar una app maliciosa para leer tus correos."
+        explanation: "Este es un ataque de Consentimiento OAuth. La táctica es pedirte que autorices una aplicación de terceros maliciosa para leer tus correos."
       }
     ];
 
@@ -240,9 +240,13 @@
       document.getElementById('action-buttons').style.display = 'none';
       let fbArea = document.getElementById('feedback-area');
       fbArea.style.display = 'block';
+      
+      // ESTA ES LA LÓGICA CORREGIDA QUE EVALÚA EL ACIERTO
       fbArea.className = isCorrect ? 'feedback-box feedback-success' : 'feedback-box feedback-error';
       document.getElementById('feedback-title').innerText = isCorrect ? "ANÁLISIS CORRECTO" : "ANÁLISIS INCORRECTO";
-      document.getElementById('feedback-text').innerText = q.feedback;
+      
+      let prefixMsg = isCorrect ? "<span style='color:var(--accent-green)'>[ ✓ ACIERTO ]</span>" : "<span style='color:var(--accent-alert)'>[ ✕ FALLO ]</span>";
+      document.getElementById('feedback-text').innerHTML = `${prefixMsg} ${q.explanation}`;
     }
 
     function nextQuestion() {
