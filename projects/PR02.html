@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PROYECTO :: FASE 01 (ANALIZAR Y COMPARAR)</title>
+  <title>PROYECTO PR02 (CAMPAÑA DE PHISHING)</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -97,6 +97,13 @@
     .retro-table tr:hover { background: rgba(34, 211, 238, 0.05); }
     .highlight-cell { color: var(--accent-cyan); font-weight: bold; }
 
+    /* NUEVOS ESTILOS PARA EL MÓDULO INTERACTIVO */
+    .action-panel { display: flex; flex-direction: column; align-items: center; padding: 2rem; background: rgba(34, 211, 238, 0.05); border: 1px dashed var(--accent-cyan); margin-bottom: 2rem; }
+    input[type="text"] { width: 80%; max-width: 400px; padding: 12px; background: #000; color: var(--accent-green); border: 2px solid var(--accent-green); font-family: 'Space Mono'; font-size: 1rem; margin-bottom: 1rem; text-align: center; }
+    .btn-start { background: var(--accent-gold); color: #000; font-family: 'Space Mono'; font-weight: bold; padding: 15px 30px; border: 2px solid #fff; cursor: pointer; text-decoration: none; font-size: 1.2rem; transition: 0.2s; }
+    .btn-start:hover { transform: scale(1.05); box-shadow: 0 0 15px var(--accent-gold); }
+    .rank-1 { color: var(--accent-gold); font-weight: bold; font-size: 1.1em; }
+
   </style>
 </head>
 <body>
@@ -105,17 +112,17 @@
 
 <nav class="zsnes-bar">
     <a href="../index.html" class="nav-link"><< RETURN TO INDEX</a>
-    <span style="margin-left:auto; color:#aaa; font-family:'Space Mono'">DIR: /PROYECTOS/FASE_01</span>
+    <span style="margin-left:auto; color:#aaa; font-family:'Space Mono'">DIR: /PROYECTOS/PR02.HTML</span>
 </nav>
 
 <main>
 
   <header class="report-header">
-    <span class="meta-tag">FASE 1</span>
-    <span class="meta-tag">INVESTIGACIÓN</span>
+    <span class="meta-tag">FASE 1 Y 2</span>
+    <span class="meta-tag">RED TEAMING</span>
     <span class="meta-tag">SYS_USER: 177876</span>
-    <h1>ANALIZAR Y COMPARAR</h1>
-    <p style="font-size: 1.2rem; color: #fff; margin-top: 1rem;">ESTUDIO DE PLATAFORMAS PROFESIONALES DE SIMULACIÓN DE PHISHING</p>
+    <h1>DISEÑO ÉTICO DE CAMPAÑA</h1>
+    <p style="font-size: 1.2rem; color: #fff; margin-top: 1rem;">INVESTIGACIÓN DE PLATAFORMAS Y SIMULACIÓN DE RIESGO HUMANO</p>
   </header>
 
   <article class="window-frame">
@@ -126,7 +133,7 @@
     <div class="window-content">
       <h2>1. Planteamiento del Problema y Objetivos</h2>
       <p>
-        En la actualidad, el eslabón más explotado en las brechas de ciberseguridad corporativa sigue siendo el factor humano. Las campañas de ingeniería social han evolucionado, requiriendo que las organizaciones superen las pruebas esporádicas y adopten programas continuos de Security Awareness Training (SAT). 
+        En la actualidad, el eslabón más explotado en las brechas de ciberseguridad corporativa sigue siendo el factor humano. Las campañas de ingeniería social han evolucionado, requiriendo que las organizaciones superen las pruebas esporádicas y adopten programas continuos de Security Awareness Training (SAT).
       </p>
       
       <p>
@@ -267,7 +274,110 @@
     </div>
   </article>
 
+  <article class="window-frame" id="simulador">
+    <div class="window-bar">
+      <span>/BIN/PHISHING_SIMULATOR_Y_SCOREBOARD.EXE</span>
+      <div class="window-controls"><span></span><span></span></div>
+    </div>
+    <div class="window-content">
+      <h2 style="color: var(--accent-gold); text-align: center;">MÓDULO DE SIMULACIÓN Y EVALUACIÓN</h2>
+      <p style="text-align: center; margin-bottom: 2rem;">Ingresa tu Alias Operativo para acceder al simulador de 10 escenarios. Tu desempeño será registrado en la base de datos global en tiempo real.</p>
+      
+      <div class="action-panel">
+        <input type="text" id="alias-input" placeholder="INGRESA TU ALIAS (Ej. CyberNinja99)" required>
+        <button class="btn-start" onclick="iniciarQuiz()">>> INICIAR SIMULACIÓN DE PHISHING <<</button>
+      </div>
+
+      <h2>RANKING GLOBAL (FIREBASE DB)</h2>
+      <div class="table-container">
+        <table class="retro-table" style="text-align: center;">
+          <thead>
+            <tr>
+              <th style="text-align: center;">RANK</th>
+              <th style="text-align: center;">ALIAS OPERATIVO</th>
+              <th style="text-align: center;">PUNTUACIÓN</th>
+              <th style="text-align: center;">TIEMPO PROMEDIO</th>
+            </tr>
+          </thead>
+          <tbody id="scoreboard-body">
+            <tr><td colspan="4">Conectando con la base de datos de Firebase...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </article>
+
 </main>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+<script>
+  // CONFIGURACIÓN DE FIREBASE
+  const firebaseConfig = {
+    apiKey: "AIzaSyA6BKFoe6bKiwC_7psHidSISqwNU4KnM9U",
+    authDomain: "phishing-quiz-upslp.firebaseapp.com",
+    databaseURL: "https://phishing-quiz-upslp-default-rtdb.firebaseio.com",
+    projectId: "phishing-quiz-upslp",
+    storageBucket: "phishing-quiz-upslp.firebasestorage.app",
+    messagingSenderId: "336082365136",
+    appId: "1:336082365136:web:22bdaf503ad64a3374ccd5"
+  };
+
+  // Inicializar Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  // Función del Botón para iniciar el quiz
+  function iniciarQuiz() {
+    let alias = document.getElementById('alias-input').value.trim();
+    if(alias === "") {
+      alert("SEGURIDAD: Debes proporcionar un Alias Operativo para comenzar la simulación.");
+      return;
+    }
+    
+    // Guardar el alias localmente
+    localStorage.setItem("current_alias", alias);
+    
+    // Redirigir al archivo del quiz
+    window.location.href = "phishing-quiz.html";
+  }
+
+  // Cargar Scoreboard en tiempo real desde Firebase
+  const scoresRef = db.ref('leaderboard');
+  scoresRef.on('value', (snapshot) => {
+    let data = [];
+    snapshot.forEach(child => { 
+      data.push(child.val()); 
+    });
+    
+    // Ordenar: Mayor puntaje primero. En caso de empate, el de menor tiempo.
+    data.sort((a, b) => {
+      if(b.score !== a.score) return b.score - a.score;
+      return parseFloat(a.time) - parseFloat(b.time);
+    });
+
+    let tbody = document.getElementById('scoreboard-body');
+    tbody.innerHTML = ""; // Limpiar tabla de "Cargando..."
+
+    if(data.length === 0) {
+      tbody.innerHTML = "<tr><td colspan='4'>No hay registros aún. ¡Sé el primero en intentarlo!</td></tr>";
+      return;
+    }
+
+    data.forEach((user, index) => {
+      let tr = document.createElement('tr');
+      let rankClass = index === 0 ? 'rank-1' : '';
+      tr.innerHTML = `
+        <td class="${rankClass}">#${index + 1}</td>
+        <td class="${rankClass}">${user.alias}</td>
+        <td class="${rankClass}">${user.score} / 10</td>
+        <td>${user.time}s</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  });
+</script>
 
 </body>
 </html>

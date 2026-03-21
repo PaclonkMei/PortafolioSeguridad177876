@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PHISHING QUIZ :: SIMULACIÓN ÉTICA</title>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    /* Estilos del Quiz */
+    :root { --bg-void: #050508; --zsnes-top: #5a6885; --zsnes-bottom: #212536; --metal-light: #8a9bb8; --metal-dark: #12141d; --text-main: #d1d5db; --accent-cyan: #22d3ee; --accent-green: #4ade80; --accent-alert: #f87171; --accent-gold: #fbbf24; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background-color: var(--bg-void); color: var(--text-main); font-family: 'VT323', monospace; font-size: 20px; padding-top: 60px; }
+    .crt-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%); background-size: 100% 4px; pointer-events: none; z-index: 9999; }
+    .zsnes-bar { position: fixed; top: 0; left: 0; width: 100%; height: 45px; background: linear-gradient(180deg, var(--zsnes-top) 0%, var(--zsnes-bottom) 100%); border-bottom: 2px solid var(--metal-dark); display: flex; align-items: center; padding: 0 1rem; z-index: 1000; font-family: 'Space Mono', monospace; font-size: 0.85rem; }
+    .nav-link { color: #fff; text-decoration: none; font-weight: bold; }
+    main { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+    
+    .window-frame { background: #0a0a0f; border: 2px solid #333; border-top-color: var(--metal-light); border-left-color: var(--metal-light); border-right-color: var(--metal-dark); border-bottom-color: var(--metal-dark); margin-bottom: 2rem; display: none; }
+    .window-frame.active { display: block; }
+    .window-bar { background: linear-gradient(90deg, var(--zsnes-bottom), #000); padding: 5px 15px; border-bottom: 2px solid #333; font-family: 'Space Mono'; color: var(--accent-cyan); font-size: 0.8rem; }
+    .window-content { padding: 2rem; }
+    
+    h2 { color: var(--accent-gold); margin-bottom: 1rem; text-transform: uppercase; }
+    p { margin-bottom: 1rem; font-family: 'Space Mono'; font-size: 0.9rem; color: #aaa; }
+    
+    /* EMAIL MOCKUP */
+    .email-container { background: #fff; color: #000; padding: 1rem; border-radius: 4px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin-bottom: 1.5rem; }
+    .email-header { border-bottom: 1px solid #ccc; padding-bottom: 0.5rem; margin-bottom: 1rem; font-size: 0.9rem; }
+    .email-sender { font-weight: bold; }
+    .email-domain { color: #666; font-size: 0.8rem; }
+    .email-body { font-size: 0.95rem; line-height: 1.5; }
+    .fake-link { color: blue; text-decoration: underline; cursor: pointer; }
+    .fake-btn { display: inline-block; background: #0056b3; color: white; padding: 8px 15px; text-decoration: none; border-radius: 3px; margin-top: 10px; }
+
+    /* CONTROLES */
+    .btn { display: inline-block; background: transparent; color: var(--accent-cyan); border: 1px solid var(--accent-cyan); padding: 10px 20px; font-family: 'Space Mono'; cursor: pointer; transition: 0.2s; font-size: 1rem; margin-right: 10px; }
+    .btn:hover { background: var(--accent-cyan); color: #000; }
+    .btn-phishing { border-color: var(--accent-alert); color: var(--accent-alert); }
+    .btn-phishing:hover { background: var(--accent-alert); color: #000; }
+    .btn-legit { border-color: var(--accent-green); color: var(--accent-green); }
+    .btn-legit:hover { background: var(--accent-green); color: #000; }
+    .btn-big { display: block; width: 100%; text-align: center; background: var(--accent-gold); color: #000; font-size: 1.5rem; font-weight: bold; padding: 15px; text-decoration: none; border: 2px solid #fff; margin-top: 2rem; transition: 0.2s; }
+    .btn-big:hover { transform: scale(1.02); box-shadow: 0 0 15px var(--accent-gold); }
+
+    /* FEEDBACK */
+    .feedback-box { padding: 1rem; margin-top: 1rem; font-family: 'Space Mono'; font-size: 0.9rem; display: none; border-left: 4px solid; }
+    .feedback-success { border-color: var(--accent-green); background: rgba(74, 222, 128, 0.1); color: var(--accent-green); }
+    .feedback-error { border-color: var(--accent-alert); background: rgba(248, 113, 113, 0.1); color: var(--accent-alert); }
+
+    /* TABLA RETRO PARA RESULTADOS */
+    table { width: 100%; border-collapse: collapse; font-family: 'Space Mono'; font-size: 0.85rem; margin-top: 1rem;}
+    th, td { padding: 10px; border: 1px solid #333; text-align: center; }
+    th { background: #111; color: var(--accent-cyan); }
+    .rank-1 { color: var(--accent-gold); font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="crt-overlay"></div>
+  <nav class="zsnes-bar">
+    <a href="PR02.html" class="nav-link"><< CANCELAR Y VOLVER</a>
+    <span style="margin-left:auto;">DIR: /QUIZ/SIMULATOR.EXE</span>
+  </nav>
+
+  <main>
+    <article id="view-quiz" class="window-frame active">
+      <div class="window-bar">/SYS/ANALISIS_CORREO.EXE - ESCENARIO <span id="q-counter">1</span>/10</div>
+      <div class="window-content">
+        <h2 id="q-title">Cargando escenario...</h2>
+        
+        <div class="email-container">
+          <div class="email-header">
+            De: <span id="q-sender" class="email-sender"></span> <span id="q-domain" class="email-domain"></span><br>
+            Asunto: <span id="q-subject"></span>
+          </div>
+          <div id="q-body" class="email-body"></div>
+        </div>
+
+        <div id="action-buttons">
+          <button class="btn btn-phishing" onclick="checkAnswer(true)">ES PHISHING</button>
+          <button class="btn btn-legit" onclick="checkAnswer(false)">ES LEGÍTIMO</button>
+        </div>
+
+        <div id="feedback-area" class="feedback-box">
+          <strong id="feedback-title"></strong>
+          <p id="feedback-text" style="color: inherit;"></p>
+          <button class="btn" onclick="nextQuestion()" style="margin-top:10px;">SIGUIENTE >></button>
+        </div>
+      </div>
+    </article>
+
+    <article id="view-results" class="window-frame">
+      <div class="window-bar">/SYS/RESULTS_AND_RANKING.DAT</div>
+      <div class="window-content">
+        <h2 style="text-align: center;">Simulación Completada</h2>
+        <p style="text-align: center;">Operador <span id="res-alias" style="color:var(--accent-green);font-weight:bold;"></span>, tus métricas han sido registradas en la base de datos central.</p>
+        
+        <h1 style="color: var(--accent-cyan); font-size: 5rem; text-align: center; margin: 0;" id="final-score">0/10</h1>
+        <p style="text-align: center; margin-bottom: 2rem;">PUNTOS BASE</p>
+
+        <h3 style="color: var(--accent-gold); border-bottom: 1px solid #333; padding-bottom: 5px;">TOP 5 - RANKING GLOBAL</h3>
+        <table>
+          <thead>
+            <tr><th>RANK</th><th>ALIAS</th><th>SCORE</th><th>TIEMPO PROMEDIO</th></tr>
+          </thead>
+          <tbody id="mini-scoreboard">
+            <tr><td colspan="4">Consultando DB...</td></tr>
+          </tbody>
+        </table>
+
+        <a href="PR02.html" class="btn-big">FINALIZAR Y VOLVER AL REPORTE PRINCIPAL >></a>
+      </div>
+    </article>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+  <script>
+    // CONFIGURACIÓN DE FIREBASE
+    const firebaseConfig = {
+      apiKey: "AIzaSyA6BKFoe6bKiwC_7psHidSISqwNU4KnM9U",
+      authDomain: "phishing-quiz-upslp.firebaseapp.com",
+      databaseURL: "https://phishing-quiz-upslp-default-rtdb.firebaseio.com",
+      projectId: "phishing-quiz-upslp",
+      storageBucket: "phishing-quiz-upslp.firebasestorage.app",
+      messagingSenderId: "336082365136",
+      appId: "1:336082365136:web:22bdaf503ad64a3374ccd5"
+    };
+    
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // Validar usuario activo
+    let currentAlias = localStorage.getItem("current_alias");
+    if(!currentAlias) {
+      alert("No se encontró usuario activo. Regresando al inicio.");
+      window.location.href = "PR02.html";
+    }
+
+    // BASE DE DATOS DE ESCENARIOS
+    const quizData = [
+      {
+        title: "Alerta de Urgencia (Spear Phishing)",
+        sender: "IT Support", domain: "<admin@it-support-update.com>", subject: "URGENTE: Cierre de cuenta inminente",
+        body: "Estimado usuario, hemos detectado actividad inusual. Su cuenta será suspendida en 2 horas si no verifica su identidad.<br><br><a href='#' class='fake-btn'>Verificar Cuenta Ahora</a>",
+        isPhishing: true,
+        feedback: "¡Bien hecho! El dominio 'it-support-update.com' es un engaño clásico (typosquatting). La urgencia ('en 2 horas') es una táctica psicológica para forzar el clic."
+      },
+      {
+        title: "Notificación de Google (Legítimo)",
+        sender: "Google Security", domain: "<no-reply@accounts.google.com>", subject: "Nuevo inicio de sesión en Windows",
+        body: "Se ha detectado un nuevo inicio de sesión en tu cuenta de Google desde un dispositivo Windows. Si fuiste tú, no tienes que hacer nada.<br><br><a href='#' class='fake-link'>Revisar actividad</a>",
+        isPhishing: false,
+        feedback: "Correcto. El dominio del remitente termina exactamente en '@accounts.google.com' y la URL apunta al dominio oficial."
+      },
+      {
+        title: "Adjunto Malicioso (Malware)",
+        sender: "Recursos Humanos", domain: "<rrhh@tuempresa.com>", subject: "Nueva política de vacaciones 2026",
+        body: "Hola equipo, adjunto el nuevo tabulador de vacaciones que entra en vigor de inmediato. Por favor, revisen el documento.<br><br>📎 <b>Politicas_Vacaciones_2026.pdf.exe</b> (1.2 MB)",
+        isPhishing: true,
+        feedback: "¡Excelente! La técnica de la doble extensión (.pdf.exe) es muy usada para camuflar malware. Un PDF real no termina en .exe."
+      },
+      {
+        title: "Bypass de MFA (Ingeniería Social)",
+        sender: "Microsoft Authenticator", domain: "<mfa-auth@microsoft-security.net>", subject: "Aprobación de inicio de sesión requerida",
+        body: "Hemos bloqueado un intento de inicio de sesión. Para asegurar su cuenta, por favor ingrese el código enviado a su teléfono en el siguiente portal de verificación seguro.<br><br><a href='#' class='fake-btn'>Ingresar Código MFA</a>",
+        isPhishing: true,
+        feedback: "Correcto. Los atacantes intentan robar tu token MFA llevándote a sitios falsos. Microsoft nunca usará un dominio '.net' genérico."
+      },
+      {
+        title: "Factura de Proveedor (Fraude CEO)",
+        sender: "Finanzas Paypal", domain: "<service@paypal.com>", subject: "Factura #99320 Pagada",
+        body: "Tu pago de $450.00 USD a 'TechCorp' se ha procesado. Si no reconoces esta transacción, cancela el pago desde nuestro portal:<br><br><a href='#' class='fake-link'>Cancelar Transacción</a>",
+        isPhishing: true,
+        feedback: "Buen ojo. Aunque el remitente parezca real (Spoofing), el enlace oculta un dominio fraudulento de robo de credenciales."
+      },
+      {
+        title: "Invitación de GitHub (Legítimo)",
+        sender: "GitHub", domain: "<noreply@github.com>", subject: "[GitHub] You've been invited to the 'CyberSec' organization",
+        body: "Hi there! Admin has invited you to join the CyberSec organization on GitHub.<br><br><a href='#' class='fake-btn'>Join Organization</a>",
+        isPhishing: false,
+        feedback: "Acertaste. Es una invitación legítima. La infraestructura de envío corresponde oficialmente a GitHub."
+      },
+      {
+        title: "Almacenamiento Lleno (Homógrafo)",
+        sender: "OneDrive Alerts", domain: "<storage-alert@0nedrive.com>", subject: "Tu almacenamiento está al límite (99%)",
+        body: "Tu cuenta de OneDrive ha superado el límite de almacenamiento. Actualiza tu plan gratuitamente aquí.<br><br><a href='#' class='fake-link'>Actualizar Plan</a>",
+        isPhishing: true,
+        feedback: "¡Exacto! El atacante usó un cero '0' en lugar de la letra 'O' en '0nedrive.com'. Técnica de homógrafo."
+      },
+      {
+        title: "Actualización de Slack (Legítimo)",
+        sender: "Slack Workspace", domain: "<notification@slack.com>", subject: "New sign-in to your workspace",
+        body: "We noticed a new sign-in to your Slack workspace from a new device (Mac OS).<br>If this was you, you can ignore this message.",
+        isPhishing: false,
+        feedback: "Correcto. Slack utiliza '@slack.com' para notificaciones reales y no amenaza con borrar cuentas."
+      },
+      {
+        title: "Oferta de Amazon (Smishing/Scam)",
+        sender: "Amazon Promos", domain: "<deals@amazon-rewards-2026.com>", subject: "¡Ganaste una tarjeta de regalo de $1000!",
+        body: "Has sido seleccionado al azar para recibir una tarjeta de regalo de $1000. Solo paga $1 de envío confirmando tu tarjeta aquí.<br><br><a href='#' class='fake-btn'>Reclamar Premio</a>",
+        isPhishing: true,
+        feedback: "Bien hecho. Los premios inesperados que piden datos de tarjeta son estafas financieras clásicas."
+      },
+      {
+        title: "Compartición de Documento (OAuth Phishing)",
+        sender: "DocuSign System", domain: "<alerts@docusign.net>", subject: "Documento legal pendiente de firma",
+        body: "El departamento legal ha compartido un contrato confidencial contigo. Autoriza a la aplicación 'Legal_Reader' a acceder a tu cuenta de Microsoft 365 para leerlo.<br><br><a href='#' class='fake-link'>Autorizar y Leer</a>",
+        isPhishing: true,
+        feedback: "¡Excelente detección! Este es un ataque de Consentimiento OAuth. Pide autorizar una app maliciosa para leer tus correos."
+      }
+    ];
+
+    let currentQ = 0, score = 0, questionStartTime = 0;
+    let questionTimes = [];
+
+    function loadQuestion() {
+      if(currentQ >= quizData.length) { endQuizAndSave(); return; }
+      let q = quizData[currentQ];
+      document.getElementById('q-counter').innerText = (currentQ + 1);
+      document.getElementById('q-title').innerText = q.title;
+      document.getElementById('q-sender').innerText = q.sender;
+      document.getElementById('q-domain').innerText = q.domain;
+      document.getElementById('q-subject').innerText = q.subject;
+      document.getElementById('q-body').innerHTML = q.body;
+      
+      document.getElementById('action-buttons').style.display = 'block';
+      document.getElementById('feedback-area').style.display = 'none';
+      questionStartTime = Date.now();
+    }
+
+    function checkAnswer(userSaysPhishing) {
+      let timeTaken = (Date.now() - questionStartTime) / 1000;
+      questionTimes.push(timeTaken);
+      let q = quizData[currentQ];
+      let isCorrect = (userSaysPhishing === q.isPhishing);
+      
+      if(isCorrect) score++;
+
+      document.getElementById('action-buttons').style.display = 'none';
+      let fbArea = document.getElementById('feedback-area');
+      fbArea.style.display = 'block';
+      fbArea.className = isCorrect ? 'feedback-box feedback-success' : 'feedback-box feedback-error';
+      document.getElementById('feedback-title').innerText = isCorrect ? "ANÁLISIS CORRECTO" : "ANÁLISIS INCORRECTO";
+      document.getElementById('feedback-text').innerText = q.feedback;
+    }
+
+    function nextQuestion() {
+      currentQ++;
+      loadQuestion();
+    }
+
+    function endQuizAndSave() {
+      document.getElementById('view-quiz').classList.remove('active');
+      document.getElementById('view-results').classList.add('active');
+      
+      document.getElementById('res-alias').innerText = currentAlias;
+      document.getElementById('final-score').innerText = score + "/10";
+
+      let avgTime = questionTimes.reduce((a, b) => a + b, 0) / questionTimes.length;
+      
+      // GUARDAR EN FIREBASE
+      db.ref('leaderboard').push({
+        alias: currentAlias,
+        score: score,
+        time: avgTime.toFixed(1),
+        timestamp: Date.now()
+      });
+
+      // LEER FIREBASE PARA MOSTRAR TOP 5
+      db.ref('leaderboard').orderByChild('score').on('value', (snapshot) => {
+        let data = [];
+        snapshot.forEach(child => { data.push(child.val()); });
+        
+        data.sort((a, b) => {
+          if(b.score !== a.score) return b.score - a.score;
+          return parseFloat(a.time) - parseFloat(b.time);
+        });
+
+        let tbody = document.getElementById('mini-scoreboard');
+        tbody.innerHTML = "";
+        
+        // Mostrar solo los primeros 5
+        data.slice(0, 5).forEach((user, index) => {
+          let tr = document.createElement('tr');
+          let rankClass = index === 0 ? 'rank-1' : '';
+          tr.innerHTML = `
+            <td class="${rankClass}">#${index + 1}</td>
+            <td class="${rankClass}">${user.alias}</td>
+            <td class="${rankClass}">${user.score}/10</td>
+            <td>${user.time}s</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      });
+    }
+
+    // Iniciar
+    loadQuestion();
+  </script>
+</body>
+</html>
