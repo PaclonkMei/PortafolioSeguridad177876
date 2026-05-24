@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ACT-16 :: DILEMAS ÉTICOS</title>
+  <link rel="icon" type="image/png" href="../assets/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-void: #050508;
+      --zsnes-top: #5a6885;
+      --zsnes-bottom: #212536;
+      --metal-light: #8a9bb8;
+      --metal-dark: #12141d;
+      --text-main: #d1d5db;
+      --text-dim: #9ca3af;
+      --accent-blue: #8ab4f8;
+      --accent-cyan: #67e8f9;
+      --accent-green: #4ade80;
+      --accent-gold: #facc15;
+      --accent-red: #ef4444;
+      --accent-purple: #a78bfa;
+      --panel-bg: #0a0a0f;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background:
+        radial-gradient(circle at 15% 0%, rgba(138, 180, 248, 0.12), transparent 32%),
+        radial-gradient(circle at 85% 8%, rgba(103, 232, 249, 0.08), transparent 28%),
+        linear-gradient(180deg, #050508 0%, #08080d 55%, #030305 100%);
+      color: var(--text-main);
+      font-family: 'VT323', monospace;
+      font-size: 20px;
+      line-height: 1.6;
+      padding-top: 60px;
+      overflow-x: hidden;
+    }
+    .crt-overlay {
+      position: fixed; inset: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.12) 50%);
+      background-size: 100% 4px;
+      pointer-events: none;
+      z-index: 9999;
+    }
+    .zsnes-bar {
+      position: fixed; top: 0; left: 0; width: 100%; height: 45px;
+      background: linear-gradient(180deg, var(--zsnes-top) 0%, var(--zsnes-bottom) 100%);
+      border-bottom: 2px solid var(--metal-dark);
+      display: flex; align-items: center; padding: 0 1rem; z-index: 1000;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      font-family: 'Space Mono', monospace; font-size: 0.82rem;
+    }
+    .nav-link { color: #fff; text-decoration: none; margin-right: 20px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+    .nav-link:hover { color: var(--accent-cyan); }
+    main { max-width: 1100px; margin: 2rem auto; padding: 0 1rem; }
+    .report-header { text-align: center; border-bottom: 2px dashed #444; padding-bottom: 2rem; margin-bottom: 3rem; }
+    .report-header h1 { font-size: clamp(2.6rem, 6vw, 5rem); text-shadow: 4px 4px 0 #000; letter-spacing: 2px; line-height: 1; margin: 1rem 0; }
+    .subtitle { font-family: 'Space Mono', monospace; font-size: 0.9rem; color: var(--text-dim); max-width: 880px; margin: 0 auto; }
+    .meta-tag { background: #111; padding: 2px 8px; font-family: 'Space Mono', monospace; font-size: 0.75rem; color: #aaa; border: 1px solid #444; display: inline-block; margin: 3px; }
+    .window-frame { background: var(--panel-bg); border: 2px solid #333; border-top-color: var(--metal-light); border-left-color: var(--metal-light); border-right-color: var(--metal-dark); border-bottom-color: var(--metal-dark); margin-bottom: 3rem; box-shadow: 10px 10px 0 rgba(0,0,0,0.35); }
+    .window-bar { background: linear-gradient(90deg, var(--zsnes-bottom), #000); padding: 5px 15px; border-bottom: 2px solid #333; display: flex; justify-content: space-between; align-items: center; font-family: 'Space Mono', monospace; font-size: 0.75rem; color: var(--accent-blue); letter-spacing: 1px; text-transform: uppercase; }
+    .window-controls span { display: inline-block; width: 10px; height: 10px; border: 1px solid var(--text-dim); background: #000; margin-left: 3px; }
+    .window-content { padding: 2rem; }
+    h2 { color: var(--accent-blue); font-size: 1.5rem; margin: 0 0 1rem 0; text-transform: uppercase; border-left: 5px solid var(--accent-blue); padding-left: 12px; }
+    h3 { color: #fff; font-size: 1.5rem; margin: 1rem 0 0.5rem; line-height: 1.2; }
+    p { color: var(--text-dim); margin-bottom: 1rem; text-align: justify; }
+    strong { color: #fff; }
+    ul { color: var(--text-dim); margin-left: 1.2rem; margin-bottom: 1rem; }
+    li { margin-bottom: 0.35rem; }
+    .terminal-line { font-family: 'Space Mono', monospace; font-size: 0.82rem; color: var(--accent-green); background: #000; border: 1px solid #333; padding: 1rem; margin-top: 1rem; overflow-x: auto; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+    .card { background: #050508; border: 1px solid #333; padding: 1.2rem; }
+    .card h3, .card h4 { color: var(--accent-cyan); font-family: 'Space Mono', monospace; font-size: 0.92rem; margin-bottom: 0.7rem; text-transform: uppercase; }
+    .card p { text-align: left; font-size: 0.98rem; }
+    .tech-table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-family: 'Space Mono', monospace; font-size: 0.8rem; }
+    .tech-table th { background: #15151a; color: var(--accent-cyan); padding: 9px; border: 1px solid #444; text-align: left; }
+    .tech-table td { border: 1px solid #333; padding: 9px; vertical-align: top; color: var(--text-main); background: rgba(0,0,0,0.22); }
+    .tech-table tr:hover td { background: rgba(103, 232, 249, 0.05); }
+    .pill { display: inline-block; border: 1px solid #333; background: #050508; color: var(--accent-gold); font-family: 'Space Mono'; font-size: 0.75rem; padding: 3px 8px; margin: 2px; }
+    .btn-action { display: inline-block; background: var(--metal-dark); color: var(--accent-cyan); border: 1px solid var(--metal-light); padding: 8px 14px; text-decoration: none; font-family: 'Space Mono', monospace; font-size: 0.78rem; text-transform: uppercase; margin-right: 0.5rem; margin-top: 0.5rem; cursor: pointer; }
+    .btn-action:hover { background: var(--accent-cyan); color: #000; }
+    .pdf-viewer { width: 100%; height: 620px; border: 1px solid #333; background: #000; margin-top: 1rem; }
+    footer { text-align: center; padding: 3rem 1rem; color: #555; font-size: 0.9rem; border-top: 1px solid #222; margin-top: 3rem; font-family: 'Space Mono', monospace; }
+    @media (max-width: 700px) { body { font-size: 18px; } .zsnes-bar { font-size: 0.65rem; } .window-content { padding: 1.2rem; } .pdf-viewer { height: 420px; } }
+    @media print {
+      body { background: #fff; color: #111; padding-top: 0; font-size: 14px; }
+      .crt-overlay, .zsnes-bar, .btn-action, .pdf-viewer { display: none !important; }
+      .window-frame { box-shadow: none; border: 1px solid #999; page-break-inside: avoid; }
+      .window-bar { color: #111; background: #ddd; border-bottom: 1px solid #999; }
+      p, li, td { color: #111; }
+      h1, h2, h3, strong { color: #000 !important; }
+    }
+</style>
+</head>
+<body>
+<div class="crt-overlay"></div>
+<nav class="zsnes-bar">
+  <a href="../index.html" class="nav-link"><< RETURN TO INDEX</a>
+  <span style="margin-left:auto; color:#aaa; font-family:'Space Mono'">FILE: ACT16_DILEMAS_ETICOS.HTML</span>
+</nav>
+<main>
+  <header class="report-header">
+    <span class="meta-tag">CNO V</span>
+    <span class="meta-tag">TEAM 03</span>
+    <span class="meta-tag">SYS_USER: 177876</span>
+    <h1 style="color:var(--accent-gold);">DILEMAS ÉTICOS</h1>
+    <p class="subtitle">Análisis profesional de tres dilemas reales en ciberseguridad: privacidad, divulgación responsable y límites éticos del OSINT.</p>
+    <div class="terminal-line">root@portfolio:/final_patch$ render --html --pdf-export --visual-mode=zsnes_chromecore</div>
+    <a class="btn-action" href="../assets/act16-Equipo3.pdf" target="_blank">Abrir PDF original</a>
+    <button class="btn-action" onclick="window.print()">Exportar página a PDF</button>
+  </header>
+
+  <article class="window-frame">
+    <div class="window-bar"><span>/DOCS/00_OBJETIVO_ETICO.TXT</span><div class="window-controls"><span></span><span></span><span></span></div></div>
+    <div class="window-content">
+      <h2>Objetivo de la actividad</h2>
+      <p>La actividad analiza tres escenarios donde la ciberseguridad deja de ser solamente técnica y se vuelve una decisión profesional: acceso no autorizado interno, explotación de una vulnerabilidad financiera no reportada y uso abusivo de OSINT. El punto central es separar investigación legítima de abuso de poder, manteniendo trazabilidad, proporcionalidad y respeto por las personas.</p>
+      <div class="grid">
+        <div class="card"><h3>Privacidad</h3><p>El acceso técnico no equivale a autorización ética. Los logs pueden revelar abuso interno y deben manejarse con cadena de mando.</p></div>
+        <div class="card"><h3>Responsabilidad</h3><p>Un hallazgo crítico no autoriza explotación. El valor profesional aparece al reportar, no al aprovechar el vacío contractual.</p></div>
+        <div class="card"><h3>Dignidad</h3><p>La información OSINT no debe transformarse en hostigamiento. La evidencia debe ir a canales legales, no a presión psicológica.</p></div>
+      </div>
+    </div>
+  </article>
+
+  <article class="window-frame">
+    <div class="window-bar"><span>/CASES/ETHICAL_DECISION_MATRIX.DB</span><div class="window-controls"><span></span><span></span><span></span></div></div>
+    <div class="window-content">
+      <h2>Matriz de dilemas</h2>
+      <table class="tech-table">
+        <thead><tr><th>Escenario</th><th>Dilema ético</th><th>Acción profesional</th><th>Clasificación</th></tr></thead>
+        <tbody>
+          <tr><td>01 :: Acceso no autorizado interno</td><td>Seguridad proactiva vs privacidad individual.</td><td>Contener permisos, abrir ticket, preservar logs y notificar a CISO/RH.</td><td>Delito informático por acceso no autorizado a sistema de información.</td></tr>
+          <tr><td>02 :: Vulnerabilidad crítica no reportada</td><td>Lucro personal vs integridad profesional.</td><td>Divulgación responsable, reporte inmediato y cero explotación.</td><td>Delito asistido por computadora: el sistema sirve como medio para robo/fraude.</td></tr>
+          <tr><td>03 :: Uso de herramientas OSINT</td><td>Obediencia a superior vs legalidad/dignidad humana.</td><td>Negarse al hostigamiento, entregar evidencia objetiva y conservar cadena de custodia.</td><td>Delito incidental: la tecnología facilita acoso/extorsión.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </article>
+
+  <article class="window-frame">
+    <div class="window-bar"><span>/LOGS/SCENARIO_01_PRIVACY_BREACH.LOG</span><div class="window-controls"><span></span><span></span><span></span></div></div>
+    <div class="window-content">
+      <h2>Escenario 01: Acceso no autorizado interno</h2>
+      <p><strong>Dilema:</strong> un compañero revisa correos privados del director general alegando que buscaba fugas de información. El problema real es que el fin defensivo no justifica violar privacidad, confidencialidad ni proceso interno.</p>
+      <p><strong>Resolución:</strong> restringir temporalmente permisos, documentar el hallazgo con ticket de incidente y escalar a CISO y Recursos Humanos. La investigación debe proteger evidencia, no convertirse en una reacción informal.</p>
+      <div class="terminal-line">ethics_check --case=01 --violated="privacy, due_process" --response="contain + report + preserve_logs"</div>
+      <table class="tech-table"><tr><th>Utilitarismo</th><td>Permitir espionaje interno daña más a la organización que el supuesto beneficio de detectar una fuga.</td></tr><tr><th>Derechos</th><td>La privacidad de comunicaciones no puede revocarse unilateralmente.</td></tr><tr><th>Bien común</th><td>La seguridad depende de reglas compartidas; las excepciones destruyen confianza institucional.</td></tr></table>
+    </div>
+  </article>
+
+  <article class="window-frame">
+    <div class="window-bar"><span>/LOGS/SCENARIO_02_RESPONSIBLE_DISCLOSURE.LOG</span><div class="window-controls"><span></span><span></span><span></span></div></div>
+    <div class="window-content">
+      <h2>Escenario 02: Vulnerabilidad crítica no reportada</h2>
+      <p><strong>Dilema:</strong> durante un pentest aparece una falla financiera explotable antes de firmar el contrato final. Aunque exista oportunidad técnica, explotar la vulnerabilidad transformaría al especialista en atacante.</p>
+      <p><strong>Resolución:</strong> aplicar divulgación responsable, reportar el hallazgo al contacto técnico, demostrar valor profesional y no extraer dinero ni datos. La reputación y la legalidad valen más que cualquier ganancia inmediata.</p>
+      <div class="terminal-line">responsible_disclosure --severity=critical --exploit=false --notify=client_contact --evidence=minimal</div>
+      <table class="tech-table"><tr><th>Utilitarismo</th><td>Reportar protege ahorros y estabilidad financiera; explotar causaría daño masivo.</td></tr><tr><th>Derechos</th><td>Los clientes conservan derecho a propiedad y seguridad de sus activos.</td></tr><tr><th>Bien común</th><td>La banca digital depende de confianza; abusar de una falla destruye ese bien compartido.</td></tr></table>
+    </div>
+  </article>
+
+  <article class="window-frame">
+    <div class="window-bar"><span>/LOGS/SCENARIO_03_OSINT_BOUNDARIES.LOG</span><div class="window-controls"><span></span><span></span><span></span></div></div>
+    <div class="window-content">
+      <h2>Escenario 03: Uso de herramientas OSINT</h2>
+      <p><strong>Dilema:</strong> encontrar datos personales en fuentes abiertas no autoriza usarlos para presionar psicológicamente a una persona sospechosa. La frontera está entre investigación legítima y acoso.</p>
+      <p><strong>Resolución:</strong> ejercer objeción profesional, negarse a la presión psicológica, entregar hallazgos de manera objetiva al área legal y preservar cadena de custodia. La tecnología debe apoyar la justicia, no el vigilantismo.</p>
+      <div class="terminal-line">osint_rules --purpose=evidence --prohibit="harassment, coercion, doxxing" --route=legal_team</div>
+      <table class="tech-table"><tr><th>Utilitarismo</th><td>La presión psicológica expone a la empresa a demandas y desprestigio.</td></tr><tr><th>Derechos</th><td>Una persona sospechosa conserva dignidad y derecho a no sufrir tratos degradantes.</td></tr><tr><th>Bien común</th><td>La justicia corresponde a autoridades y procesos formales, no a castigos privados.</td></tr></table>
+    </div>
+  </article>
+
+  <article class="window-frame">
+    <div class="window-bar"><span>/EVIDENCE/PDF_VIEWER.EMBED</span><div class="window-controls"><span></span><span></span><span></span></div></div>
+    <div class="window-content">
+      <h2>Visor de evidencia original</h2>
+      <p>Este visor incrusta el PDF entregado como evidencia formal. Si GitHub Pages no lo renderiza en algún navegador, el botón superior abre el archivo directamente.</p>
+      <iframe class="pdf-viewer" src="../assets/act16-Equipo3.pdf"></iframe>
+    </div>
+  </article>
+  <footer>© 2026 BRUNO LUNA & EQUIPO 3 | UPSLP - SEGURIDAD INFORMÁTICA</footer>
+</main>
+</body>
+</html>

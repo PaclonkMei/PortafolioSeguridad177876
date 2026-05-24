@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ACT-17 :: CVSS 3.1</title>
+  <link rel="icon" type="image/png" href="../assets/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-void: #050508;
+      --zsnes-top: #5a6885;
+      --zsnes-bottom: #212536;
+      --metal-light: #8a9bb8;
+      --metal-dark: #12141d;
+      --text-main: #d1d5db;
+      --text-dim: #9ca3af;
+      --accent-blue: #8ab4f8;
+      --accent-cyan: #67e8f9;
+      --accent-green: #4ade80;
+      --accent-gold: #facc15;
+      --accent-red: #ef4444;
+      --accent-purple: #a78bfa;
+      --panel-bg: #0a0a0f;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background:
+        radial-gradient(circle at 15% 0%, rgba(138, 180, 248, 0.12), transparent 32%),
+        radial-gradient(circle at 85% 8%, rgba(103, 232, 249, 0.08), transparent 28%),
+        linear-gradient(180deg, #050508 0%, #08080d 55%, #030305 100%);
+      color: var(--text-main);
+      font-family: 'VT323', monospace;
+      font-size: 20px;
+      line-height: 1.6;
+      padding-top: 60px;
+      overflow-x: hidden;
+    }
+    .crt-overlay {
+      position: fixed; inset: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.12) 50%);
+      background-size: 100% 4px;
+      pointer-events: none;
+      z-index: 9999;
+    }
+    .zsnes-bar {
+      position: fixed; top: 0; left: 0; width: 100%; height: 45px;
+      background: linear-gradient(180deg, var(--zsnes-top) 0%, var(--zsnes-bottom) 100%);
+      border-bottom: 2px solid var(--metal-dark);
+      display: flex; align-items: center; padding: 0 1rem; z-index: 1000;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      font-family: 'Space Mono', monospace; font-size: 0.82rem;
+    }
+    .nav-link { color: #fff; text-decoration: none; margin-right: 20px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+    .nav-link:hover { color: var(--accent-cyan); }
+    main { max-width: 1100px; margin: 2rem auto; padding: 0 1rem; }
+    .report-header { text-align: center; border-bottom: 2px dashed #444; padding-bottom: 2rem; margin-bottom: 3rem; }
+    .report-header h1 { font-size: clamp(2.6rem, 6vw, 5rem); text-shadow: 4px 4px 0 #000; letter-spacing: 2px; line-height: 1; margin: 1rem 0; }
+    .subtitle { font-family: 'Space Mono', monospace; font-size: 0.9rem; color: var(--text-dim); max-width: 880px; margin: 0 auto; }
+    .meta-tag { background: #111; padding: 2px 8px; font-family: 'Space Mono', monospace; font-size: 0.75rem; color: #aaa; border: 1px solid #444; display: inline-block; margin: 3px; }
+    .window-frame { background: var(--panel-bg); border: 2px solid #333; border-top-color: var(--metal-light); border-left-color: var(--metal-light); border-right-color: var(--metal-dark); border-bottom-color: var(--metal-dark); margin-bottom: 3rem; box-shadow: 10px 10px 0 rgba(0,0,0,0.35); }
+    .window-bar { background: linear-gradient(90deg, var(--zsnes-bottom), #000); padding: 5px 15px; border-bottom: 2px solid #333; display: flex; justify-content: space-between; align-items: center; font-family: 'Space Mono', monospace; font-size: 0.75rem; color: var(--accent-blue); letter-spacing: 1px; text-transform: uppercase; }
+    .window-controls span { display: inline-block; width: 10px; height: 10px; border: 1px solid var(--text-dim); background: #000; margin-left: 3px; }
+    .window-content { padding: 2rem; }
+    h2 { color: var(--accent-blue); font-size: 1.5rem; margin: 0 0 1rem 0; text-transform: uppercase; border-left: 5px solid var(--accent-blue); padding-left: 12px; }
+    h3 { color: #fff; font-size: 1.5rem; margin: 1rem 0 0.5rem; line-height: 1.2; }
+    p { color: var(--text-dim); margin-bottom: 1rem; text-align: justify; }
+    strong { color: #fff; }
+    ul { color: var(--text-dim); margin-left: 1.2rem; margin-bottom: 1rem; }
+    li { margin-bottom: 0.35rem; }
+    .terminal-line { font-family: 'Space Mono', monospace; font-size: 0.82rem; color: var(--accent-green); background: #000; border: 1px solid #333; padding: 1rem; margin-top: 1rem; overflow-x: auto; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+    .card { background: #050508; border: 1px solid #333; padding: 1.2rem; }
+    .card h3, .card h4 { color: var(--accent-cyan); font-family: 'Space Mono', monospace; font-size: 0.92rem; margin-bottom: 0.7rem; text-transform: uppercase; }
+    .card p { text-align: left; font-size: 0.98rem; }
+    .tech-table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-family: 'Space Mono', monospace; font-size: 0.8rem; }
+    .tech-table th { background: #15151a; color: var(--accent-cyan); padding: 9px; border: 1px solid #444; text-align: left; }
+    .tech-table td { border: 1px solid #333; padding: 9px; vertical-align: top; color: var(--text-main); background: rgba(0,0,0,0.22); }
+    .tech-table tr:hover td { background: rgba(103, 232, 249, 0.05); }
+    .pill { display: inline-block; border: 1px solid #333; background: #050508; color: var(--accent-gold); font-family: 'Space Mono'; font-size: 0.75rem; padding: 3px 8px; margin: 2px; }
+    .btn-action { display: inline-block; background: var(--metal-dark); color: var(--accent-cyan); border: 1px solid var(--metal-light); padding: 8px 14px; text-decoration: none; font-family: 'Space Mono', monospace; font-size: 0.78rem; text-transform: uppercase; margin-right: 0.5rem; margin-top: 0.5rem; cursor: pointer; }
+    .btn-action:hover { background: var(--accent-cyan); color: #000; }
+    .pdf-viewer { width: 100%; height: 620px; border: 1px solid #333; background: #000; margin-top: 1rem; }
+    footer { text-align: center; padding: 3rem 1rem; color: #555; font-size: 0.9rem; border-top: 1px solid #222; margin-top: 3rem; font-family: 'Space Mono', monospace; }
+    @media (max-width: 700px) { body { font-size: 18px; } .zsnes-bar { font-size: 0.65rem; } .window-content { padding: 1.2rem; } .pdf-viewer { height: 420px; } }
+    @media print {
+      body { background: #fff; color: #111; padding-top: 0; font-size: 14px; }
+      .crt-overlay, .zsnes-bar, .btn-action, .pdf-viewer { display: none !important; }
+      .window-frame { box-shadow: none; border: 1px solid #999; page-break-inside: avoid; }
+      .window-bar { color: #111; background: #ddd; border-bottom: 1px solid #999; }
+      p, li, td { color: #111; }
+      h1, h2, h3, strong { color: #000 !important; }
+    }
+</style>
+</head>
+<body>
+<div class="crt-overlay"></div>
+<nav class="zsnes-bar">
+  <a href="../index.html" class="nav-link"><< RETURN TO INDEX</a>
+  <span style="margin-left:auto; color:#aaa; font-family:'Space Mono'">FILE: ACT17_CVSS31.HTML</span>
+</nav>
+<main>
+  <header class="report-header">
+    <span class="meta-tag">CNO V</span>
+    <span class="meta-tag">TEAM 03</span>
+    <span class="meta-tag">SYS_USER: 177876</span>
+    <h1 style="color:var(--accent-cyan);">CVSS 3.1</h1>
+    <p class="subtitle">Evaluación de una vulnerabilidad mediante vector CVSS v3.1, puntuación base, categoría de riesgo e interpretación técnica.</p>
+    <div class="terminal-line">root@portfolio:/final_patch$ render --html --pdf-export --visual-mode=zsnes_chromecore</div>
+    <a class="btn-action" href="../assets/act17-Equipo3.pdf" target="_blank">Abrir PDF original</a>
+    <button class="btn-action" onclick="window.print()">Exportar página a PDF</button>
+  </header>
+
+  <article class="window-frame">
+    <div class="window-bar"><span>/CVSS/VECTOR_BUILDER.CONF</span><div class="window-controls"><span></span><span></span><span></span></div></div>
+    <div class="window-content">
+      <h2>Construcción del vector CVSS v3.1</h2>
+      <p>El vector evaluado describe una vulnerabilidad explotable por red, de baja complejidad, sin interacción del usuario, pero con privilegios altos requeridos. Por eso no llega a severidad alta, aunque sigue siendo relevante por escenarios de cuentas privilegiadas comprometidas.</p>
+      <div class="terminal-line">CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:L/I:L/A:L</div>
+      <table class="tech-table">
+        <thead><tr><th>Métrica</th><th>Valor</th><th>Lectura técnica</th></tr></thead>
+        <tbody>
+          <tr><td>AV</td><td>Network</td><td>La explotación puede realizarse a través de la red.</td></tr>
+          <tr><td>AC</td><td>Low</td><td>No exige condiciones especiales complejas.</td></tr>
+          <tr><td>PR</td><td>High</td><td>Requiere privilegios elevados para ejecutar la explotación.</td></tr>
+          <tr><td>UI</td><td>None</td><td>No depende de que un usuario interactúe.</td></tr>
+          <tr><td>S</td><td>Unchanged</td><td>El impacto permanece dentro del mismo alcance de seguridad.</td></tr>
+          <tr><td>C/I/A</td><td>Low / Low / Low</td><td>El impacto existe, pero se mantiene limitado en confidencialidad, integridad y disponibilidad.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </article>
+
+  <article class="window-frame">
+    <div class="window-bar"><span>/SYS/CVSS_SCORE_MONITOR.EXE</span><div class="window-controls"><span></span><span></span><span></span></div></div>
+    <div class="window-content">
+      <h2>Puntuación e interpretación</h2>
+      <div class="grid">
+        <div class="card" style="border-color: var(--accent-gold);"><h3>Base Score</h3><p style="font-size:3rem; color:var(--accent-gold); text-align:center; margin:0;">4.7</p><p style="text-align:center;">Severidad media</p></div>
+        <div class="card"><h3>Por qué no es crítica</h3><p>El requisito de privilegios altos reduce la exposición directa. No cualquier atacante puede explotarla desde cero.</p></div>
+        <div class="card"><h3>Por qué importa</h3><p>Si una cuenta privilegiada cae por phishing, fuerza bruta o filtración, la falla puede amplificar el daño interno.</p></div>
+      </div>
+      <table class="tech-table"><tr><th>Rango CVSS</th><th>Categoría</th></tr><tr><td>0.1 - 3.9</td><td>Baja</td></tr><tr><td>4.0 - 6.9</td><td>Media</td></tr><tr><td>7.0 - 8.9</td><td>Alta</td></tr><tr><td>9.0 - 10</td><td>Crítica</td></tr></table>
+    </div>
+  </article>
+
+  <article class="window-frame">
+    <div class="window-bar"><span>/ANALYSIS/THREAT_CONTEXT.LOG</span><div class="window-controls"><span></span><span></span><span></span></div></div>
+    <div class="window-content">
+      <h2>Interpretación técnica</h2>
+      <p>Aunque el impacto en confidencialidad, integridad y disponibilidad es bajo, la vulnerabilidad debe atenderse porque se vuelve peligrosa dentro de una cadena de ataque. Su escenario más realista no es un atacante externo sin acceso, sino un usuario interno malicioso, un administrador comprometido o una intrusión que ya escaló privilegios.</p>
+      <p>El hecho de que sea explotable por red y con baja complejidad incrementa la necesidad de monitoreo. Si el atacante ya tiene credenciales elevadas, una vulnerabilidad de impacto bajo puede ser usada como pivote para generar cambios menores, interrupciones limitadas o acceso parcial a datos internos.</p>
+      <div class="terminal-line">risk_context = network_exposure + low_complexity + privileged_account_compromise</div>
+    </div>
+  </article>
+
+  <article class="window-frame">
+    <div class="window-bar"><span>/ETC/MITIGATION_PLAN.SH</span><div class="window-controls"><span></span><span></span><span></span></div></div>
+    <div class="window-content">
+      <h2>Plan de mitigación recomendado</h2>
+      <div class="grid">
+        <div class="card"><h3>Privilegios mínimos</h3><p>Reducir cuentas con permisos altos y revisar roles administrativos de forma periódica.</p></div>
+        <div class="card"><h3>MFA + monitoreo</h3><p>Proteger accesos privilegiados con MFA y alertas por comportamiento anómalo.</p></div>
+        <div class="card"><h3>Gestión de parches</h3><p>Aplicar actualización o compensación técnica para disminuir probabilidad de explotación.</p></div>
+        <div class="card"><h3>Segmentación</h3><p>Limitar alcance de red para que una cuenta comprometida no impacte más activos.</p></div>
+      </div>
+    </div>
+  </article>
+
+  <article class="window-frame">
+    <div class="window-bar"><span>/EVIDENCE/PDF_VIEWER.EMBED</span><div class="window-controls"><span></span><span></span><span></span></div></div>
+    <div class="window-content">
+      <h2>Visor de evidencia original</h2>
+      <p>Este visor incrusta el PDF entregado como evidencia formal. Si GitHub Pages no lo renderiza en algún navegador, el botón superior abre el archivo directamente.</p>
+      <iframe class="pdf-viewer" src="../assets/act17-Equipo3.pdf"></iframe>
+    </div>
+  </article>
+  <footer>© 2026 BRUNO LUNA & EQUIPO 3 | UPSLP - SEGURIDAD INFORMÁTICA</footer>
+</main>
+</body>
+</html>
